@@ -1,0 +1,10 @@
+[flake8]
+max-line-length = 110
+exclude =
+    migrations,
+    tests,
+    docs,
+    __pycache__,
+    env,
+    venv,
+    alembic
