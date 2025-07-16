@@ -1,0 +1,24 @@
+.loginWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+.loginPaper {
+  padding: 2rem;
+  margin: 1rem;
+  border-radius: 12px;
+  max-width: 380px;
+  width: 100%;
+}
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loginButton {
+  margin-top: 1.5rem;
+}
+
