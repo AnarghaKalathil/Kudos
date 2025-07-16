@@ -1,0 +1,89 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/*
+!venv/.gitkeep
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+.python-version
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Django specific
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+static/collected/
+#*/migrations/*.py
+#migrations
+
+# Django migrations
+# Uncomment if you don't want to track migrations
+# !*/migrations/__init__.py
+
+# Logs
+#logs/
+*.log
+log/
+
+# Project specific
+.env
+.env.*
+!.env.example
+config.ini
+secrets/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
