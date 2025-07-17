@@ -5,6 +5,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 from .utils.env import get_env_value
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -27,10 +28,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
-    'drf_spectacular',
-    'drf_spectacular_sidecar',
-    'corsheaders',
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
+    "corsheaders",
     "accounts",
+    "dashboard",
 ]
 
 MIDDLEWARE = [
@@ -41,22 +43,22 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "kudosbackend.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # You can keep this empty unless you have custom templates
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],  # You can keep this empty unless you have custom templates
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -68,7 +70,7 @@ WSGI_APPLICATION = "kudosbackend.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": get_env_value("DATABASE_NAME"),
         "USER": get_env_value("DATABASE_USER"),
@@ -121,7 +123,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -133,12 +135,12 @@ SIMPLE_JWT = {
     "TOKEN_BLACKLIST_ENABLED": True,
 }
 
-AUTH_USER_MODEL = 'accounts.KudosUser'
+AUTH_USER_MODEL = "accounts.KudosUser"
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your API Title',
-    'DESCRIPTION': 'API documentation for your Django project.',
-    'VERSION': '1.0.0',
+    "TITLE": "Your API Title",
+    "DESCRIPTION": "API documentation for your Django project.",
+    "VERSION": "1.0.0",
     # Optional settings:
     # 'SERVE_INCLUDE_SCHEMA': False,
     # 'COMPONENT_SPLIT_REQUEST': True,
