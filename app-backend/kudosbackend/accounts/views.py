@@ -15,6 +15,7 @@ class LoginApiView(APIView):
     @extend_schema(
         request=LoginSwaggerSerializer,
         summary="Login API",
+        tags=["User Account API's"]
     )
     def post(self, request):
         try:
@@ -90,6 +91,7 @@ class LogoutView(APIView):
     @extend_schema(
         request=LogoutSwaggerSerializer,
         summary="Logout API",
+        tags=["User Account API's"]
     )
     def post(self, request):
         try:

@@ -29,7 +29,7 @@ class Recognition(models.Model):
         default=RecognitionCategory.MENTORING,
     )
     message = models.TextField()
-    tags = models.ManyToManyField(Skills, related_name="recognitions")
+    skills = models.ManyToManyField(Skills, related_name="recognitions")
     reviewer = models.ForeignKey(
         KudosUser,
         null=True,

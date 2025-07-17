@@ -1,12 +1,17 @@
 from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
+from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
                                    SpectacularSwaggerView)
 
+@extend_schema(exclude=True)
+class HiddenSchemaView(SpectacularAPIView):
+    pass
+
 urlpatterns = [
     # SWAGGER
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/schema/", HiddenSchemaView.as_view(), name="schema"),
     path(
         "api/docs/",
         SpectacularSwaggerView.as_view(url_name="schema"),
