@@ -1,14 +1,19 @@
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+from .models import KudosUser
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from .serializers import UserSerializer, LoginSwaggerSerializer, LogoutSwaggerSerializer
+from drf_spectacular.utils import extend_schema
 
 
 class LoginApiView(APIView):
-
+    @extend_schema(
+        request=LoginSwaggerSerializer,
+        summary="Login API",
+    )
     def post(self, request):
         try:
 
@@ -37,8 +42,8 @@ class LoginApiView(APIView):
                 )
 
             try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
+                user = KudosUser.objects.get(email=email)
+            except KudosUser.DoesNotExist:
                 return Response(
                     {"data": "", "message": "User not found.", "status": False},
                     status=status.HTTP_404_NOT_FOUND,
@@ -48,12 +53,14 @@ class LoginApiView(APIView):
             user = authenticate(username=user.username, password=password)
             if user is not None:
                 refresh = RefreshToken.for_user(user)
+                serializer = UserSerializer(user)
                 return Response(
                     {
                         "data": {
                             "user_id": user.id,
                             "username": user.username,
                             "email": user.email,
+                            "user_data": serializer.data,
                             "access_token": str(refresh.access_token),
                             "refresh_token": str(refresh),
                         },
@@ -78,9 +85,13 @@ class LoginApiView(APIView):
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=LogoutSwaggerSerializer,
+        summary="Logout API",
+    )
     def post(self, request):
         try:
-            refresh_token = request.data.get("refresh")
+            refresh_token = request.data.get("refresh_token")
 
             if not refresh_token:
                 return Response(
@@ -93,7 +104,7 @@ class LogoutView(APIView):
 
             return Response(
                 {"message": "Logout successful.", "status": True},
-                status=status.HTTP_205_RESET_CONTENT,
+                status=status.HTTP_200_OK,
             )
 
         except TokenError:
