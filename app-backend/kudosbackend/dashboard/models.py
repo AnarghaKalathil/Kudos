@@ -1,0 +1,57 @@
+from django.db import models
+
+from accounts.models import KudosUser
+
+
+class RecognitionCategory(models.TextChoices):
+    MENTORING = "Mentoring", "Mentoring"
+    LEADERSHIP = "Leadership", "Leadership"
+    CREATIVITY = "Creativity", "Creativity"
+
+
+class Skills(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name if self.name else ""
+
+
+class Recognition(models.Model):
+    sender = models.ForeignKey(
+        KudosUser, related_name="recognitions_given", on_delete=models.CASCADE
+    )
+    receiver = models.ForeignKey(
+        KudosUser, related_name="recognitions_received", on_delete=models.CASCADE
+    )
+    category = models.CharField(
+        max_length=50,
+        choices=RecognitionCategory.choices,
+        default=RecognitionCategory.MENTORING,
+    )
+    message = models.TextField()
+    skills = models.ManyToManyField(Skills, related_name="recognitions")
+    reviewer = models.ForeignKey(
+        KudosUser,
+        null=True,
+        blank=True,
+        related_name="reviews",
+        on_delete=models.SET_NULL,
+    )
+    is_reviewed = models.BooleanField(default=False)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return (
+            f"{self.sender} ➡ {self.receiver}" if self.sender and self.receiver else ""
+        )
+
+
+class Star(models.Model):
+    recognition = models.OneToOneField(
+        Recognition, on_delete=models.CASCADE, related_name="star"
+    )
+    date_given = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Star for {self.recognition.receiver} on {self.skill}"

@@ -59,7 +59,10 @@ coverage.xml
 cover/
 
 # Django specific
+*.iml
 *.log
+*.xml
+misc.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
