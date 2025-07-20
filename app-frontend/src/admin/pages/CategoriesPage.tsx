@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import { Box, Typography, Button } from '@mui/material';
+import DataTable from '../components/DataTable';
+import FormModal from '../components/FormModal';
+
+const CategoriesPage: React.FC = () => {
+  const [categories, setCategories] = useState([
+    { id: 1, categoryName: 'Mentoring', updatedTime: '2025-07-20' },
+    { id: 2, categoryName: 'Leadership', updatedTime: '2025-07-19' },
+  ]);
+
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({ categoryName: '' });
+  const [editId, setEditId] = useState<number | null>(null);
+
+  const handleOpen = () => {
+    setFormData({ categoryName: '' });
+    setEditId(null);
+    setOpen(true);
+  };
+
+  const handleEdit = (category: any) => {
+    setFormData(category);
+    setEditId(category.id);
+    setOpen(true);
+  };
+
+  const handleDelete = (id: number) => {
+    setCategories(categories.filter((c) => c.id !== id));
+  };
+
+  const handleSubmit = () => {
+    const updatedTime = new Date().toISOString().split('T')[0];
+    if (editId) {
+      setCategories(categories.map((c) => (c.id === editId ? { ...formData, id: editId, updatedTime } : c)));
+    } else {
+      setCategories([...categories, { ...formData, id: Date.now(), updatedTime }]);
+    }
+    setOpen(false);
+  };
+
+  const columns = [
+    { key: 'categoryName', label: 'Category Name' },
+    { key: 'updatedTime', label: 'Last Updated' },
+  ];
+
+  return (
+    <Box p={3}>
+      <Typography variant="h5">Categories</Typography>
+      <Button variant="contained" onClick={handleOpen} sx={{ mb: 2 }}>
+        Add Category
+      </Button>
+
+      <DataTable
+        columns={columns}
+        rows={categories}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+
+      <FormModal
+        open={open}
+        handleClose={() => setOpen(false)}
+        formData={formData}
+        setFormData={setFormData}
+        handleSubmit={handleSubmit}
+        title={editId ? 'Edit Category' : 'Add Category'}
+      />
+    </Box>
+  );
+};
+
+export default CategoriesPage;
