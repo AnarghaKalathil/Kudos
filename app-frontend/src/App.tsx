@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AdminApp from './admin/AdminApp';
 
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Login />} />
           <Route path="/admin/*" element={<AdminApp />} />
           <Route path="*" element={<NotFound />} />
+        
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
