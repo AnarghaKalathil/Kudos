@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Users, Trophy, Search, Plus, Award, Target, MessageCircle } from "lucide-react";
+import { Star, Users, Trophy, Search, Plus, Award, Target, LogOut,MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,15 +8,27 @@ import { EmployeeDirectory } from "@/components/EmployeeDirectory";
 import { GiveRecognition } from "@/components/GiveRecognition";
 import { UserProfile } from "@/components/UserProfile";
 import { TagSearch } from "@/components/TagSearch";
+import RecognitionTabs from "@/components/Leaderboard";
+
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedEmployee, setSelectedEmployee] = useState<{ id: string; name: string } | null>(null);
+  const [isFromGiveStar, setIsFromGiveStar] = useState(false);
+
+    const handleLogout = () => {
+    localStorage.removeItem("authToken"); 
+    sessionStorage.clear();
+     window.location.href = "/"; 
+    }
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    
+    <div className="h-full bg-gradient-hero min-h-full">
       {/* Header */}
+      <div className="sticky top-0 z-50 bg-white ">
       <header className="bg-card shadow-soft border-b">
-        <div className="container mx-auto px-4 py-3 sm:py-4">
+        <div className="container mx-auto px-4 py-3 sm:py-4 ">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
@@ -29,23 +41,24 @@ const Index = () => {
             </div>
             
             <div className="flex items-center gap-1 sm:gap-2">
-              <Badge variant="secondary" className="gap-1 text-xs">
-                <Star className="w-3 h-3" />
-                <span className="hidden sm:inline">Level </span>3
-              </Badge>
               <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-xs sm:text-sm font-semibold text-primary-foreground">JD</span>
               </div>
+                         <Badge variant="secondary" className="gap-1 text-s cursor-pointer" onClick={handleLogout}>
+                <LogOut className="w-5 h-6" />
+                <span className="hidden sm:inline" >log out </span> 
+              </Badge>
             </div>
           </div>
         </div>
       </header>
+      </div>
 
       {/* Navigation */}
       <nav className="bg-card border-b">
         <div className="container mx-auto px-2 sm:px-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 bg-transparent h-auto">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-transparent h-auto">
               <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-3">
                 <Target className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Overview</span>
@@ -71,9 +84,23 @@ const Index = () => {
                 <span className="hidden sm:inline">Profile</span>
                 <span className="sm:hidden">Me</span>
               </TabsTrigger>
+                   <TabsTrigger value="review" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-3">
+                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">View Reviews</span>
+                <span className="sm:hidden">Review</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="py-4 sm:py-6">
+              <div className="bg-gradient-primary rounded-xl p-6 mb-16 text-white">
+                <h2 className="text-2xl font-bold mb-2">Welcome back, John! ✨</h2>
+                <p className="text-white/90 mb-4">
+                  Ready to spread some appreciation? You have 3 pending recognition requests to review.
+                </p>
+                <Button className="bg-white text-primary hover:bg-white/90" onClick={() => setActiveTab("review")}>
+                  Review Requests
+                </Button>
+              </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 <Card className="bg-gradient-card shadow-medium">
                   <CardHeader>
@@ -169,56 +196,37 @@ const Index = () => {
                 </Card>
               </div>
 
-              {/* Recent Activity */}
-              <Card className="shadow-medium">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageCircle className="w-5 h-5" />
-                    Recent Recognition
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { from: "Alice Chen", to: "Bob Smith", tag: "React Debug", time: "2 hours ago" },
-                      { from: "Charlie Kim", to: "Diana Lee", tag: "API Design", time: "4 hours ago" },
-                      { from: "Eve Wilson", to: "Frank Davis", tag: "Docker Setup", time: "1 day ago" },
-                    ].map((activity, index) => (
-                      <div key={index} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-secondary rounded-lg">
-                        <Star className="w-4 h-4 text-star flex-shrink-0 mt-0.5" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
-                            <span className="font-medium text-sm sm:text-base">{activity.from}</span>
-                            <span className="text-muted-foreground text-sm hidden sm:inline"> gave a star to </span>
-                            <span className="font-medium text-sm sm:text-base">{activity.to}</span>
-                            <span className="text-muted-foreground text-sm hidden sm:inline"> for </span>
-                          </div>
-                          <div className="flex items-center gap-1 mt-1 sm:mt-0 sm:inline">
-                            <Badge variant="outline" className="text-xs">{activity.tag}</Badge>
-                            <span className="text-xs text-muted-foreground sm:ml-2">{activity.time}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="directory" className="py-4 sm:py-6">
-              <EmployeeDirectory />
+              <EmployeeDirectory
+                onGiveStar={(employee) => {
+                  setSelectedEmployee(employee); 
+                  setIsFromGiveStar(true);
+                  setActiveTab("give");
+                }} />
             </TabsContent>
 
             <TabsContent value="give" className="py-4 sm:py-6">
-              <GiveRecognition />
+              <GiveRecognition selectedEmployee={selectedEmployee} isFromGiveStar={isFromGiveStar} />
             </TabsContent>
 
             <TabsContent value="search" className="py-4 sm:py-6">
-              <TagSearch />
+              <TagSearch
+                onGiveStar={(employee) => {
+                  setSelectedEmployee(employee);
+                  setIsFromGiveStar(true);
+                  setActiveTab("give");
+                }} />
             </TabsContent>
 
             <TabsContent value="profile" className="py-4 sm:py-6">
               <UserProfile />
+            </TabsContent>
+
+             <TabsContent value="review" className="py-4 sm:py-6">
+              <RecognitionTabs 
+                />
             </TabsContent>
           </Tabs>
         </div>

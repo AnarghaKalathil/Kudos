@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Star, Send, User, Tag, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,10 @@ interface Employee {
   role: string;
   department: string;
   initials: string;
+}
+
+type Props = {
+  selectedEmployee: Employee | null;
 }
 
 const mockEmployees: Employee[] = [
@@ -44,14 +48,35 @@ const suggestedTags = [
   "Figma", "Design Systems", "User Research", "Prototyping"
 ];
 
-export const GiveRecognition = () => {
-  const [selectedEmployee, setSelectedEmployee] = useState<string>("");
+const reviewerOptions = [
+  { id: "manager", label: "Direct Manager" },
+  { id: "hr", label: "HR Team" },
+  { id: "tech-lead", label: "Tech Lead" },
+  { id: "team-lead", label: "Team Lead" },
+];
+
+interface GiveRecognitionProps {
+  selectedEmployee: { id: string; name: string } | null;
+  isFromGiveStar: boolean;
+}
+
+export const GiveRecognition = ({ selectedEmployee,isFromGiveStar }: GiveRecognitionProps) => {
+  
+  const [selectedEmployees, setSelectedEmployees] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
   const [reviewer, setReviewer] = useState<string>("");
+
   const { toast } = useToast();
+
+useEffect(() => {
+  if (isFromGiveStar && selectedEmployee?.id) {
+    setSelectedEmployees(selectedEmployee.id);
+  }
+}, [selectedEmployee, isFromGiveStar]);
+
 
   const handleAddTag = (tag: string) => {
     if (tag && !tags.includes(tag)) {
@@ -67,7 +92,7 @@ export const GiveRecognition = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedEmployee || !category || !message || tags.length === 0) {
+    if (!selectedEmployees || !category || !message || reviewer || tags.length === 0) {
       toast({
         title: "Please fill in all fields",
         description: "All fields are required to submit recognition.",
@@ -76,7 +101,7 @@ export const GiveRecognition = () => {
       return;
     }
 
-    const employee = mockEmployees.find(emp => emp.id === selectedEmployee);
+    const employee = mockEmployees.find(emp => emp.id === selectedEmployees);
     
     toast({
       title: "Recognition sent for review!",
@@ -84,7 +109,7 @@ export const GiveRecognition = () => {
     });
 
     // Reset form
-    setSelectedEmployee("");
+    setSelectedEmployees("");
     setCategory("");
     setMessage("");
     setTags([]);
@@ -92,7 +117,7 @@ export const GiveRecognition = () => {
     setReviewer("");
   };
 
-  const selectedEmployeeData = mockEmployees.find(emp => emp.id === selectedEmployee);
+  const selectedEmployeeData = mockEmployees.find(emp => emp.id === selectedEmployees);
 
   return (
     <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
@@ -117,7 +142,7 @@ export const GiveRecognition = () => {
             {/* Employee Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Who are you recognizing?</label>
-              <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+              <Select value={selectedEmployees} onValueChange={setSelectedEmployees}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a teammate" />
                 </SelectTrigger>
@@ -245,13 +270,24 @@ export const GiveRecognition = () => {
               <label className="text-sm font-medium text-foreground">Send to Reviewer</label>
               <Select value={reviewer} onValueChange={setReviewer}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select reviewer (optional)" />
+                  <SelectValue placeholder="Select reviewer" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="manager">Direct Manager</SelectItem>
-                  <SelectItem value="hr">HR Team</SelectItem>
-                  <SelectItem value="tech-lead">Tech Lead</SelectItem>
-                  <SelectItem value="team-lead">Team Lead</SelectItem>
+                         <SelectContent>
+                  {mockEmployees.map(employee => (
+                    <SelectItem key={employee.id} value={employee.id}>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                            {employee.initials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{employee.name}</div>
+                          <div className="text-xs text-muted-foreground">{employee.role}</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -264,33 +300,6 @@ export const GiveRecognition = () => {
         </CardContent>
       </Card>
 
-      {/* Recent Recognition Preview */}
-      <Card className="bg-gradient-card shadow-medium">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="w-5 h-5" />
-            Recent Recognition
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="p-3 bg-secondary rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Star className="w-4 h-4 text-star" />
-                <span className="font-medium">You gave a star to Alice Chen</span>
-                <Badge variant="outline" className="text-xs">Pending Review</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                "Alice helped me debug a complex React component issue..."
-              </p>
-              <div className="flex gap-1 mt-2">
-                <Badge variant="outline" className="text-xs">React</Badge>
-                <Badge variant="outline" className="text-xs">Debug</Badge>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
