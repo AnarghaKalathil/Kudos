@@ -129,16 +129,7 @@ export const UserProfile = () => {
                 
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
-                  <span className="text-base sm:text-lg font-semibold">Level {currentLevel}</span>
                 </div>
-              </div>
-              
-              <div className="mt-3 w-full">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Progress to Level {currentLevel + 1}</span>
-                  <span className="text-sm font-medium">{nextLevelProgress}%</span>
-                </div>
-                <Progress value={nextLevelProgress} className="h-2" />
               </div>
             </div>
           </div>
@@ -147,11 +138,10 @@ export const UserProfile = () => {
 
       {/* Profile Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="recognitions">Recognitions</TabsTrigger>
           <TabsTrigger value="skills">Skills</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 sm:space-y-6">
@@ -312,37 +302,6 @@ export const UserProfile = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="achievements" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="shadow-medium">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-star rounded-full flex items-center justify-center">
-                    <Star className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">First Star</h3>
-                    <p className="text-sm text-muted-foreground">Received your first recognition</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="shadow-medium">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                    <Trophy className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Level 3 Achiever</h3>
-                    <p className="text-sm text-muted-foreground">Reached level 3 in recognition</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   );

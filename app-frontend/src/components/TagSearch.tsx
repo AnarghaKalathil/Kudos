@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Search, Filter, Star, MessageCircle, Mail } from "lucide-react";
+import { Search, Filter, Star, MessageCircle, Trophy,User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface Employee {
   id: string;
@@ -21,6 +22,10 @@ interface Employee {
   }>;
   email: string;
   initials: string;
+}
+
+interface TagSearchProps {
+  onGiveStar: (employee: Employee) => void;
 }
 
 const mockEmployees: Employee[] = [
@@ -108,11 +113,12 @@ const mockEmployees: Employee[] = [
 
 const allSkills = Array.from(new Set(mockEmployees.flatMap(emp => emp.skills))).sort();
 
-export const TagSearch = () => {
+export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSkill, setSelectedSkill] = useState("any-skill");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [minStars, setMinStars] = useState("0");
+   const [viewingEmployee, setViewingEmployee] = useState(null);
 
   const filteredEmployees = mockEmployees.filter(employee => {
     const matchesSearch = 
@@ -154,7 +160,7 @@ export const TagSearch = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-20">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Search</label>
               <div className="relative">
@@ -183,37 +189,6 @@ export const TagSearch = () => {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Department</label>
-              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Any department" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map(dept => (
-                    <SelectItem key={dept} value={dept}>
-                      {dept === "all" ? "All Departments" : dept}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Min Stars</label>
-              <Select value={minStars} onValueChange={setMinStars}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Any level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">Any level</SelectItem>
-                  <SelectItem value="10">10+ stars</SelectItem>
-                  <SelectItem value="20">20+ stars</SelectItem>
-                  <SelectItem value="30">30+ stars</SelectItem>
-                  <SelectItem value="40">40+ stars</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -241,7 +216,7 @@ export const TagSearch = () => {
           </div>
         </CardContent>
       </Card>
-
+     
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {filteredEmployees.map((employee) => (
           <Card key={employee.id} className="bg-gradient-card shadow-medium hover:shadow-large transition-shadow">
@@ -262,64 +237,109 @@ export const TagSearch = () => {
                 </div>
               </div>
             </CardHeader>
-
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   {employee.department}
                 </Badge>
               </div>
-
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-foreground">Top Skills</h4>
-                <div className="space-y-1">
-                  {employee.recognitions.slice(0, 3).map((recognition, index) => (
-                    <div key={index} className="flex items-center justify-between text-sm">
-                      <span className="text-foreground">{recognition.skill}</span>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 text-star" />
-                        <span className="text-star font-medium">{recognition.count}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-foreground">All Skills</h4>
-                <div className="flex flex-wrap gap-1">
-                  {employee.skills.map((skill, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="outline" 
-                      className={`text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground ${
-                        selectedSkill === skill ? 'bg-primary text-primary-foreground' : ''
-                      }`}
-                      onClick={() => setSelectedSkill(selectedSkill === skill ? "any-skill" : skill)}
-                    >
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <Button size="sm" className="flex-1 text-xs sm:text-sm">
-                  <MessageCircle className="w-3 h-3 mr-1" />
-                  <span className="hidden sm:inline">Ask </span>Question
+              <div className="flex gap-60 pt-2">
+                <Button
+                  size="sm"
+                  className="flex-1 text-xs sm:text-sm"
+                  onClick={() => setViewingEmployee(employee)}
+                >
+                  <User className="w-3 h-3 mr-1" />
+                  <span className="hidden sm:inline">View </span>Profile
                 </Button>
-                <Button size="sm" variant="outline" className="text-xs sm:text-sm">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs sm:text-sm"
+                  onClick={() => onGiveStar(employee)}
+                >
                   <Star className="w-3 h-3 mr-1" />
                   <span className="hidden sm:inline">Recognize</span>
-                </Button>
-                <Button size="sm" variant="outline" className="px-2 sm:px-3">
-                  <Mail className="w-3 h-3" />
                 </Button>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {viewingEmployee && (
+<Dialog open={!!viewingEmployee} onOpenChange={() => setViewingEmployee(null)}>
+  <DialogContent className="max-w-3xl"> {/* WIDER MODAL */}
+    <Card className="bg-gradient-card shadow-medium w-full">
+      <CardContent className="pt-4 sm:pt-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+          {/* Avatar */}
+          <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xl sm:text-2xl font-bold">
+              {viewingEmployee.initials}
+            </AvatarFallback>
+          </Avatar>
+
+          {/* Info */}
+          <div className="flex-1 text-center sm:text-left">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{viewingEmployee.name}</h1>
+            <p className="text-base sm:text-lg text-muted-foreground">{viewingEmployee.role}</p>
+            <p className="text-sm text-muted-foreground">
+              {viewingEmployee.department} • {viewingEmployee.email}
+            </p>
+
+            {/* Stars & Trophy */}
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-star" />
+                <span className="text-xl sm:text-2xl font-bold text-star">{viewingEmployee.stars}</span>
+                <span className="text-sm text-muted-foreground">stars earned</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Skills */}
+        <div className="mt-6 space-y-2">
+          <h4 className="text-sm font-medium text-foreground">Top Skills</h4>
+          <div className="space-y-1">
+            {viewingEmployee.recognitions.slice(0, 3).map((recognition, index) => (
+              <div key={index} className="flex items-center justify-between text-sm">
+                <span className="text-foreground">{recognition.skill}</span>
+                <div className="flex items-center gap-1">
+                  <Star className="w-3 h-3 text-star" />
+                  <span className="text-star font-medium">{recognition.count}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* All Skills */}
+        <div className="mt-4 space-y-2">
+          <h4 className="text-sm font-medium text-foreground">All Badges</h4>
+          <div className="flex flex-wrap gap-1">
+            {viewingEmployee.skills.map((skill, index) => (
+              <Badge
+                key={index}
+                variant="outline"
+                className={`text-xs ${selectedSkill === skill ? "bg-primary text-primary-foreground" : ""}`}
+                onClick={() => setSelectedSkill(selectedSkill === skill ? "any-skill" : skill)}
+              >
+                {skill}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </DialogContent>
+</Dialog>
+
+      )}
 
       {filteredEmployees.length === 0 && (
         <Card className="text-center py-8 col-span-full">

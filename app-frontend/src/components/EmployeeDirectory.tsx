@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { Star, Search, Plus, Mail, MessageCircle } from "lucide-react";
+import { Star, Search, Plus} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
+interface EmployeeDirectoryProps {
+  onGiveStar: (employee: { id: string; name: string }) => void;
+}
 
 interface Employee {
   id: string;
@@ -84,12 +88,36 @@ const mockEmployees: Employee[] = [
     email: "frank.davis@company.com",
     initials: "FD",
     level: 3
+  },
+    {
+    id: "7",
+    name: "Xavier",
+    role: "Data Scientist",
+    department: "Analytics",
+    stars: 22,
+    skills: ["Python", "Machine Learning", "SQL", "Statistics"],
+    email: "frank.davis@company.com",
+    initials: "FD",
+    level: 3
+  },
+    {
+    id: "8",
+    name: "lrank aavis",
+    role: "Data Scientist",
+    department: "Analytics",
+    stars: 22,
+    skills: ["Python", "Machine Learning", "SQL", "Statistics"],
+    email: "frank.davis@company.com",
+    initials: "FD",
+    level: 3
   }
 ];
 
-export const EmployeeDirectory = () => {
+export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredEmployees = mockEmployees.filter(employee => {
     const matchesSearch = 
@@ -103,9 +131,18 @@ export const EmployeeDirectory = () => {
   });
 
   const departments = ["all", ...new Set(mockEmployees.map(emp => emp.department))];
+const employeesPerPage = 6;
+
+const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
+const indexOfLastEmployee = currentPage * employeesPerPage;
+const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
+const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+
+const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen flex flex-col">
       <div className="flex flex-col gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-foreground">Employee Directory</h2>
@@ -138,7 +175,8 @@ export const EmployeeDirectory = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filteredEmployees.map((employee) => (
+        {currentEmployees.map((employee) => (
+          <div className="flex-grow">
           <Card key={employee.id} className="bg-gradient-card shadow-medium hover:shadow-large transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
@@ -179,15 +217,68 @@ export const EmployeeDirectory = () => {
               </div>
               
               <div className="flex gap-2 pt-2">
-                <Button size="sm" className="flex-1 text-xs sm:text-sm">
+                <Button size="sm" className="flex-1 text-xs sm:text-sm" onClick={() => onGiveStar(employee)}>
                   <Plus className="w-3 h-3 mr-1" />
                   <span className="hidden sm:inline">Give </span>Star
                 </Button>
               </div>
             </CardContent>
           </Card>
+          </div>
         ))}
       </div>
+      {totalPages > 1 && (
+  <div className="flex justify-center items-center gap-1 mt-4">
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => setCurrentPage(currentPage - 1)}
+      disabled={currentPage === 1}
+    >
+      Prev
+    </Button>
+
+    {Array.from({ length: totalPages }).map((_, i) => {
+      const page = i + 1;
+      const isVisible = 
+        page === 1 ||
+        page === totalPages ||
+        (page >= currentPage - 1 && page <= currentPage + 1);
+
+      const isEllipsis =
+        (page === currentPage - 2 && page > 2) ||
+        (page === currentPage + 2 && page < totalPages - 1);
+
+      if (isEllipsis) {
+        return <span key={page} className="px-2 text-muted-foreground">...</span>;
+      }
+
+      if (!isVisible) return null;
+
+      return (
+        <Button
+          key={page}
+          variant={currentPage === page ? "default" : "outline"}
+          size="sm"
+          onClick={() => paginate(page)}
+          className="px-3"
+        >
+          {page}
+        </Button>
+      );
+    })}
+
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => setCurrentPage(currentPage + 1)}
+      disabled={currentPage === totalPages}
+    >
+      Next
+    </Button>
+  </div>
+)}
+
       
       {filteredEmployees.length === 0 && (
         <Card className="text-center py-8">
