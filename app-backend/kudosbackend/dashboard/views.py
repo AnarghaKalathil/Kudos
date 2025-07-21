@@ -9,7 +9,8 @@ from accounts.models import KudosUser
 from dashboard.models import Recognition, Star, RecognitionStatus
 from admin_dashboard.models import Skills
 from dashboard import serializer as serializer_obj
-from dashboard.serializer import StatusUpdateSerializer, RecognitionListSerializer, SkillSerializer
+from dashboard.serializer import StatusUpdateSerializer, RecognitionListSerializer, SkillSerializer, \
+    RecognitionSerializer
 
 
 class Dashboard(APIView):
@@ -204,10 +205,43 @@ class TeamList(APIView):
     )
     def get(self, request):
         try:
-            emp_list = KudosUser.objects.filter(is_superuser=False).order_by("username")
-            serializer = serializer_obj.UserSerializer(emp_list, many=True)
+            users = KudosUser.objects.filter(is_superuser=False)
+
+            data = []
+
+            for user in users:
+                star_count = Star.objects.filter(
+                    recognition__receiver=user
+                ).count()
+
+                approved_recognitions = Recognition.objects.filter(
+                    receiver=user,
+                    status=RecognitionStatus.APPROVED
+                )
+                skills = Skills.objects.filter(
+                    recognitions__in=approved_recognitions
+                ).distinct()
+
+                # Recognitions by status
+                pending = Recognition.objects.filter(receiver=user, status=RecognitionStatus.PENDING)
+                approved = approved_recognitions
+                rejected = Recognition.objects.filter(receiver=user, status=RecognitionStatus.REJECTED)
+
+                data.append({
+                    "user_id": user.id,
+                    "name": user.get_full_name() if hasattr(user, "get_full_name") else user.username,
+                    "email": user.email,
+                    "star_count": star_count,
+                    "skills": SkillSerializer(skills, many=True).data,
+                    "recognitions": {
+                        "pending": RecognitionSerializer(pending, many=True).data,
+                        "approved": RecognitionSerializer(approved, many=True).data,
+                        "rejected": RecognitionSerializer(rejected, many=True).data,
+                    }
+                })
+
             return Response(
-                {"data": serializer.data, "status": True},
+                {"data": data, "status": True},
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
@@ -254,3 +288,4 @@ class RecognitionStatusChange(APIView):
                 {"message": f"Server error: {str(e)}", "status": False},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
