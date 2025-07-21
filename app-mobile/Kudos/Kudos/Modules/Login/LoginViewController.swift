@@ -21,12 +21,8 @@ class LoginViewController: UIViewController {
     
     func setupView() {
         self.btnSignIn.layer.cornerRadius = 4
-        self.btnSignIn.layer.borderWidth = 1
-        self.btnSignIn.layer.borderColor = UIColor.tintColor.cgColor
         
         self.signInView.layer.cornerRadius = 4
-        self.signInView.layer.borderWidth = 1
-        self.signInView.layer.borderColor = UIColor.black.cgColor
     }
     
     @IBAction func onTapSignIn(_ sender: UIButton) {
