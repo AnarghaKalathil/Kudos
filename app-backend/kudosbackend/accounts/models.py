@@ -5,7 +5,7 @@ from django.db import models
 class KudosUser(AbstractUser):
     designation = models.CharField(max_length=100, blank=True, null=True)
     department = models.CharField(max_length=100, null=True)
-    profile_picture = models.ImageField(upload_to="profiles/", null=True, blank=True)
+    is_admin = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username if self.username else ""

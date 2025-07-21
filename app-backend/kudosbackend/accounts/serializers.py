@@ -21,4 +21,5 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "date_joined",
             "designation",
+            "is_admin",
         ]
