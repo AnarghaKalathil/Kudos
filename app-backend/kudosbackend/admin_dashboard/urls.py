@@ -8,9 +8,9 @@ urlpatterns = [
     path('users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
     
     # Skills management
-    path('skills/', views.skills_list, name='skills_list'),
-    path('skills/create/', views.create_skill, name='create_skill'),
-    path('skills/<int:skill_id>/delete/', views.delete_skill, name='delete_skill'),
+    # path('skills/', views.skills_list, name='skills_list'),
+    # path('skills/create/', views.create_skill, name='create_skill'),
+    # path('skills/<int:skill_id>/delete/', views.delete_skill, name='delete_skill'),
     
     # Categories management
     path('categories/', views.categories_list, name='categories_list'),

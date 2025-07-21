@@ -8,6 +8,7 @@ class RecognitionListSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
     reviewer = serializers.SerializerMethodField()
     skills = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
 
     class Meta:
         model = Recognition
@@ -24,6 +25,8 @@ class RecognitionListSerializer(serializers.ModelSerializer):
     def get_skills(self, obj):
         return obj.skills.all().values_list("name", flat=True)
 
+    def get_category(self, obj):
+        return obj.category.name
 
 class RecognitionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,3 +57,6 @@ class UserSerializer(serializers.ModelSerializer):
             "designation",
             "department",
         ]
+class StatusUpdateSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=["PENDING", "REJECTED", "APPROVED"])

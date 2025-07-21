@@ -7,7 +7,7 @@ from .models import Category
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = KudosUser
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'designation', 'department', 'is_admin', 'date_joined']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'designation', 'department', 'date_joined']
         read_only_fields = ['id', 'date_joined']
 
 

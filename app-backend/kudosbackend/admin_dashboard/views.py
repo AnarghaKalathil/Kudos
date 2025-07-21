@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 
 from accounts.models import KudosUser
-from dashboard.models import Skills
+from admin_dashboard.models import Skills
 from .models import Category
 from .serializers import (
     UserSerializer, CreateUserSerializer, SkillsSerializer, CategorySerializer
