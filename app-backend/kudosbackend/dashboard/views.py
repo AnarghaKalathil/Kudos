@@ -1,12 +1,112 @@
+from django.db.models import Q, Count
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from collections import defaultdict
 from accounts.models import KudosUser
-from dashboard.models import Recognition, Skills
+from admin_dashboard.serializers import CategorySerializer
+from dashboard.models import Recognition, Star, RecognitionStatus
+from admin_dashboard.models import Skills, Category
 from dashboard import serializer as serializer_obj
+from dashboard.serializer import StatusUpdateSerializer, RecognitionListSerializer, SkillSerializer, \
+    RecognitionSerializer
+
+
+class Dashboard(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    @extend_schema(
+        summary="Get All User Daata",
+        tags=["Accounts API's"],
+    )
+    def get(self, request):
+        try:
+            user = request.user
+            star_count = Star.objects.filter(
+                Q(recognition__sender=user) |
+                Q(recognition__receiver=user) |
+                Q(recognition__reviewer=user)
+            ).count()
+
+            pending = Recognition.objects.filter(status=RecognitionStatus.PENDING)
+            approved = Recognition.objects.filter(status=RecognitionStatus.APPROVED)
+            rejected = Recognition.objects.filter(status=RecognitionStatus.REJECTED)
+
+            approved_user_recognitions = Recognition.objects.filter(
+                status=RecognitionStatus.APPROVED,
+                receiver=user
+            )
+            skills_qs = Skills.objects.filter(
+                recognitions__in=approved_user_recognitions
+            ).distinct()
+
+            # Top 5 users with most stars received
+            top_users_qs = KudosUser.objects.annotate(
+                star_count=Count('recognitions_received__star')
+            ).filter(
+                star_count__gt=0
+            ).order_by('-star_count')[:5]
+
+            top_users = []
+            total_users = ""
+            total_contributors = ""
+            total_star_count = ""
+            total_skill_count = ""
+            for u in top_users_qs:
+                recognitions = Recognition.objects.filter(receiver=u, status=RecognitionStatus.APPROVED)
+
+                user_categories = Category.objects.filter(
+                    recognitions_category__in=recognitions
+                ).distinct()
+
+                user_skills = Skills.objects.filter(
+                    recognitions__in=recognitions
+                ).distinct()
+
+                top_users.append({
+                    "username": u.username,
+                    "first_name": u.first_name,
+                    "last_name": u.last_name,
+                    "star_count": u.star_count,
+                    "categories": CategorySerializer(user_categories, many=True).data,
+                    "skills": SkillSerializer(user_skills, many=True).data,
+                })
+                total_users = KudosUser.objects.filter(is_superuser=False).count()
+
+                total_contributors = KudosUser.objects.filter(
+                    recognitions_given__isnull=False
+                ).distinct().count()
+
+                total_star_count = Star.objects.count()
+
+                total_skill_count = Skills.objects.count()
+
+            return Response({
+                "user_data":{
+                    "star_count": star_count,
+                    "recognitions": {
+                        "pending": RecognitionListSerializer(pending, many=True).data,
+                        "approved": RecognitionListSerializer(approved, many=True).data,
+                        "rejected": RecognitionListSerializer(rejected, many=True).data,
+                    },
+                    "skills": SkillSerializer(skills_qs, many=True).data,
+                },
+                "top_users": top_users,
+                "total_count": {
+                    "total_number_of_users": total_users,
+                    "total_contributors": total_contributors,
+                    "total_star_count": total_star_count,
+                    "total_skill_count": total_skill_count,
+                }
+            })
+
+        except Exception as e:
+            return Response(
+                {"message": f"Server error: {str(e)}", "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class RecognitionData(APIView):
@@ -116,8 +216,8 @@ class SkillsData(APIView):
 
 
 class SkillDelete(APIView):
-
     permission_classes = [IsAuthenticated, ]
+
     @extend_schema(
         parameters=[
             OpenApiParameter(name='name', location=OpenApiParameter.PATH, required=True, type=str)
@@ -127,7 +227,7 @@ class SkillDelete(APIView):
     )
     def delete(self, request, name):
         try:
-            name= request.data.get("name")
+            name = request.data.get("name")
             skill = Skills.objects.filter(name=name)
             if skill:
                 skill.delete()
@@ -148,20 +248,125 @@ class SkillDelete(APIView):
 
 
 class TeamList(APIView):
-    permission_classes = [AllowAny, ]
+    permission_classes = [IsAuthenticated, ]
 
     @extend_schema(
         summary="Get All Employee List",
         tags=["Team API's"]
     )
-    def get(self,request):
+    def get(self, request):
         try:
-            emp_list = KudosUser.objects.filter(is_superuser=False).order_by("username")
-            serializer = serializer_obj.UserSerializer(emp_list, many=True)
+            users = KudosUser.objects.filter(is_superuser=False)
+
+            data = []
+
+            for user in users:
+                star_count = Star.objects.filter(
+                    recognition__receiver=user
+                ).count()
+
+                approved_recognitions = Recognition.objects.filter(
+                    receiver=user,
+                    status=RecognitionStatus.APPROVED
+                )
+                skills = Skills.objects.filter(
+                    recognitions__in=approved_recognitions
+                ).distinct()
+
+                # Recognitions by status
+                pending = Recognition.objects.filter(receiver=user, status=RecognitionStatus.PENDING)
+                approved = approved_recognitions
+                rejected = Recognition.objects.filter(receiver=user, status=RecognitionStatus.REJECTED)
+
+                data.append({
+                    "user_id": user.id,
+                    "name": user.get_full_name() if hasattr(user, "get_full_name") else user.username,
+                    "email": user.email,
+                    "star_count": star_count,
+                    "skills": SkillSerializer(skills, many=True).data,
+                    "recognitions": {
+                        "pending": RecognitionSerializer(pending, many=True).data,
+                        "approved": RecognitionSerializer(approved, many=True).data,
+                        "rejected": RecognitionSerializer(rejected, many=True).data,
+                    }
+                })
+
             return Response(
-                {"data": serializer.data, "status": True},
+                {"data": data, "status": True},
                 status=status.HTTP_200_OK,
             )
+        except Exception as e:
+            return Response(
+                {"message": f"Server error: {str(e)}", "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class RecognitionStatusChange(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    @extend_schema(
+        request=StatusUpdateSerializer,
+        summary="Recognition Status Change API's",
+        tags=["Recognition API's"]
+    )
+    def post(self, request):
+        try:
+            recognition_id = request.data.get("id")
+            rec_status = request.data.get("status")
+            print(f"status - {rec_status} || reco id - {recognition_id}")
+            if recognition_id and rec_status:
+                print("HITINF")
+                recognition_ins = Recognition.objects.get(id=recognition_id)
+                recognition_ins.status = rec_status
+                recognition_ins.save()
+                print("HIT HERE")
+                if rec_status == "APPROVED":
+                    Star.objects.get_or_create(
+                        recognition=recognition_ins
+                    )
+                return Response(
+                    {"message": "Status Updated suuccessfully", "status": True},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"message": "Invalid ID or Status, Please try again", "status": True},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except Exception as e:
+            return Response(
+                {"message": f"Server error: {str(e)}", "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class GetuserProfile(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Get User Data",
+        tags=["Accounts API's"],
+    )
+    def get(self, request):
+        try:
+            user = request.user
+
+            stars = Star.objects.filter(
+                recognition__receiver=user
+            ).select_related('recognition__category')
+
+            category_counts = defaultdict(int)
+
+            for star in stars:
+                category_name = star.recognition.category.name
+                category_counts[category_name] += 1
+
+            return Response({
+                "user_id": user.id,
+                "name": user.get_full_name() if hasattr(user, "get_full_name") else user.username,
+                "star_summary": category_counts
+            })
         except Exception as e:
             return Response(
                 {"message": f"Server error: {str(e)}", "status": False},

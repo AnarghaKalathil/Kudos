@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 
 from accounts.models import KudosUser
-from dashboard.models import Skills
+from admin_dashboard.models import Skills
 from .models import Category
 from .serializers import (
     UserSerializer, CreateUserSerializer, SkillsSerializer, CategorySerializer
@@ -77,7 +77,7 @@ def delete_user(request, user_id):
     """Delete a user (admin only)"""
     try:
         user = get_object_or_404(KudosUser, id=user_id)
-        if user.is_admin:
+        if user.is_superuser:
             return Response({
                 "data": "",
                 "message": "Cannot delete admin user",
