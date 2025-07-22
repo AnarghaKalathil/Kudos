@@ -50,6 +50,10 @@ class Dashboard(APIView):
             ).order_by('-star_count')[:5]
 
             top_users = []
+            total_users = ""
+            total_contributors = ""
+            total_star_count = ""
+            total_skill_count = ""
             for u in top_users_qs:
                 recognitions = Recognition.objects.filter(receiver=u, status=RecognitionStatus.APPROVED)
 
@@ -69,6 +73,15 @@ class Dashboard(APIView):
                     "categories": CategorySerializer(user_categories, many=True).data,
                     "skills": SkillSerializer(user_skills, many=True).data,
                 })
+                total_users = KudosUser.objects.filter(is_superuser=False).count()
+
+                total_contributors = KudosUser.objects.filter(
+                    recognitions_given__isnull=False
+                ).distinct().count()
+
+                total_star_count = Star.objects.count()
+
+                total_skill_count = Skills.objects.count()
 
             return Response({
                 "user_data":{
@@ -80,7 +93,13 @@ class Dashboard(APIView):
                     },
                     "skills": SkillSerializer(skills_qs, many=True).data,
                 },
-                "top_users": top_users
+                "top_users": top_users,
+                "total_count": {
+                    "total_number_of_users": total_users,
+                    "total_contributors": total_contributors,
+                    "total_star_count": total_star_count,
+                    "total_skill_count": total_skill_count,
+                }
             })
 
         except Exception as e:
