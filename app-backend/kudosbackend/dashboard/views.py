@@ -113,6 +113,7 @@ class RecognitionData(APIView):
     permission_classes = [
         IsAuthenticated,
     ]
+    serializer_class = serializer_obj.RecognitionSerializer
 
     @extend_schema(
         request=serializer_obj.RecognitionSerializer,
@@ -164,82 +165,6 @@ class RecognitionData(APIView):
                 {"message": "Recognition added successfully", "status": True},
                 status=status.HTTP_200_OK,
             )
-        except Exception as e:
-            return Response(
-                {"message": f"Server error: {str(e)}", "status": False},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
-class SkillsData(APIView):
-    permission_classes = [IsAuthenticated, ]
-
-    @extend_schema(
-        request=serializer_obj.RecognitionSerializer,
-        summary="Get All Skills",
-        tags=["Skill API's"]
-    )
-    def get(self, request):
-        try:
-            skill_list = Skills.objects.all().order_by("name")
-            serializer = serializer_obj.SkillListSerializer(skill_list, many=True)
-            return Response(
-                {"data": serializer.data, "status": True},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response(
-                {"message": f"Server error: {str(e)}", "status": False},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-    @extend_schema(
-        request=serializer_obj.SkillSerializer,
-        summary="Add New Skill API",
-        tags=["Skill API's"]
-    )
-    def post(self, request):
-        try:
-            skill = request.data.get("name")
-            Skills.objects.create(
-                name=skill
-            )
-            return Response(
-                {"message": "New skill created successfully", "status": True},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response(
-                {"message": f"Server error: {str(e)}", "status": False},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
-class SkillDelete(APIView):
-    permission_classes = [IsAuthenticated, ]
-
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(name='name', location=OpenApiParameter.PATH, required=True, type=str)
-        ],
-        summary="Delete Skill API",
-        tags=["Skill API's"]
-    )
-    def delete(self, request, name):
-        try:
-            name = request.data.get("name")
-            skill = Skills.objects.filter(name=name)
-            if skill:
-                skill.delete()
-                return Response(
-                    {"message": "Skill deleted successfully", "status": True},
-                    status=status.HTTP_200_OK,
-                )
-            else:
-                return Response(
-                    {"message": "No Skill found with given ID", "status": False},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
         except Exception as e:
             return Response(
                 {"message": f"Server error: {str(e)}", "status": False},
@@ -304,6 +229,8 @@ class TeamList(APIView):
 
 class RecognitionStatusChange(APIView):
     permission_classes = [IsAuthenticated, ]
+    serializer_class = StatusUpdateSerializer
+
 
     @extend_schema(
         request=StatusUpdateSerializer,
