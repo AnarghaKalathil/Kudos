@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog, DialogTitle, DialogContent,
@@ -12,7 +11,7 @@ interface Props {
   setFormData: (data: any) => void;
   handleSubmit: () => void;
   title: string;
-  isDeleteConfirm?: boolean; 
+  isDeleteConfirm?: boolean;
 }
 
 const FormModal: React.FC<Props> = ({
@@ -30,7 +29,7 @@ const FormModal: React.FC<Props> = ({
       <DialogContent>
         {isDeleteConfirm ? (
           <Typography>
-            Are you sure you want to delete <strong>{formData.name}</strong>?
+            Are you sure you want to delete <strong>{formData.username}</strong>?
           </Typography>
         ) : (
           <Box display="flex" flexDirection="column" gap={2} mt={1}>
@@ -40,7 +39,7 @@ const FormModal: React.FC<Props> = ({
                 <TextField
                   key={key}
                   name={key}
-                  label={key.charAt(0).toUpperCase() + key.slice(1)}
+                  label={key.charAt(0).toUpperCase() + key.replace('_', ' ').slice(1)}
                   fullWidth
                   margin="normal"
                   value={formData[key]}
@@ -68,4 +67,3 @@ const FormModal: React.FC<Props> = ({
 };
 
 export default FormModal;
-
