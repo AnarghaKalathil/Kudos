@@ -117,30 +117,54 @@ const mockRecognitions: Recognition[] = [
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Utility to get/set tokens
+const getToken = () => localStorage.getItem('authToken');
+const setToken = (token: string) => localStorage.setItem('authToken', token);
+const removeToken = () => localStorage.removeItem('authToken');
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+
 // Login API
-export const loginAPI = async (credentials: {
-  email: string;
-  username: string;
-  password: string;
-}): Promise<LoginResponse> => {
-  await delay(1000);
-  
-  // Mock authentication logic
-  const user = mockUsers.find(u => 
-    u.email === credentials.email && u.username === credentials.username
-  );
-  
-  if (user && credentials.password.length >= 6) {
-    return {
-      success: true,
-      user
-    };
+export const loginAPI = async (credentials: { email: string; password: string; }) => {
+  try {
+    const url = `${API_BASE}/accounts/api/login/`;
+    console.log('Login API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials),
+    });
+    const data = await res.json();
+    console.log('Login API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Login API error:', e);
+    return { status: false, message: 'Network error' };
   }
-  
-  return {
-    success: false,
-    message: "Invalid credentials"
-  };
+};
+
+// Logout API
+export const logoutAPI = async (): Promise<{ success: boolean; message?: string }> => {
+  const refresh = localStorage.getItem('refreshToken');
+  try {
+    const url = `${API_BASE}/accounts/api/logout/`;
+    console.log('Logout API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refresh }),
+    });
+    const data = await res.json().catch(() => ({}));
+    console.log('Logout API response:', data);
+    removeToken();
+    localStorage.removeItem('refreshToken');
+    return { success: true };
+  } catch (e) {
+    console.log('Logout API error:', e);
+    removeToken();
+    localStorage.removeItem('refreshToken');
+    return { success: false, message: 'Logout error' };
+  }
 };
 
 // Get all employees API
@@ -186,59 +210,80 @@ export const searchExpertsAPI = async (tags: string[]): Promise<User[]> => {
 };
 
 // Get user profile API
-export const getUserProfileAPI = async (userId: string): Promise<User | null> => {
-  await delay(300);
-  
-  return mockUsers.find(user => user.id === userId) || null;
+export const getUserProfileAPI = async () => {
+  try {
+    const url = `${API_BASE}/dashboard/api/profile`;
+    console.log('Get User Profile API URL:', url);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    console.log('Get User Profile API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Get User Profile API error:', e);
+    return null;
+  }
 };
 
-// Give recognition API
+// Give recognition API (Swagger: sender, receiver, category, message, skills, reviewer)
 export const giveRecognitionAPI = async (recognition: {
-  toUserId: string;
-  stars: number;
-  comment: string;
-  tags: string[];
-  category: string;
-  reviewerId: string;
+  sender: number;
+  receiver: number;
+  category: number;
+  message: string;
+  skills: number[];
+  reviewer?: number;
 }): Promise<{ success: boolean; message: string; recognitionId?: string }> => {
-  await delay(800);
-  
-  // Mock validation
-  if (recognition.stars < 1 || recognition.stars > 5) {
-    return {
-      success: false,
-      message: "Stars must be between 1 and 5"
-    };
+  try {
+    const url = `${API_BASE}/dashboard/api/recognition/`;
+    console.log('Give Recognition API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(recognition),
+    });
+    const data = await res.json().catch(() => ({}));
+    console.log('Give Recognition API response:', data);
+    if (res.ok) {
+      return { success: true, message: 'Recognition submitted', recognitionId: data.id };
+    }
+    return { success: false, message: data.message || 'Failed to submit recognition' };
+  } catch (e) {
+    console.log('Give Recognition API error:', e);
+    return { success: false, message: 'Network error' };
   }
-  
-  if (recognition.comment.length < 10) {
-    return {
-      success: false,
-      message: "Comment must be at least 10 characters"
-    };
+};
+
+// Recognition status change API (Swagger: id, status)
+export const changeRecognitionStatusAPI = async (id: number, status: string): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const url = `${API_BASE}/dashboard/api/recognition/status`;
+    console.log('Recognition Status Change API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ id, status }),
+    });
+    const data = await res.json().catch(() => ({}));
+    console.log('Recognition Status Change API response:', data);
+    if (res.ok) {
+      return { success: true };
+    }
+    return { success: false, message: data.message || 'Failed to change status' };
+  } catch (e) {
+    console.log('Recognition Status Change API error:', e);
+    return { success: false, message: 'Network error' };
   }
-  
-  // Mock successful creation
-  const newRecognition: Recognition = {
-    id: Date.now().toString(),
-    fromUser: mockUsers[0], // Current user
-    toUser: mockUsers.find(u => u.id === recognition.toUserId)!,
-    stars: recognition.stars,
-    comment: recognition.comment,
-    tags: recognition.tags,
-    category: recognition.category,
-    status: 'pending',
-    reviewerId: recognition.reviewerId,
-    createdAt: new Date().toISOString()
-  };
-  
-  mockRecognitions.push(newRecognition);
-  
-  return {
-    success: true,
-    message: "Recognition submitted successfully and sent for review",
-    recognitionId: newRecognition.id
-  };
 };
 
 // Get leaderboard API
@@ -263,6 +308,249 @@ export const getUserRecognitionsAPI = async (userId: string): Promise<Recognitio
   return mockRecognitions.filter(recognition => 
     recognition.toUser.id === userId && recognition.status === 'approved'
   );
+};
+
+// Get dashboard data
+export const getDashboardAPI = async () => {
+  try {
+    const url = `${API_BASE}/dashboard/api/dashboard/`;
+    console.log('Get Dashboard API URL:', url);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    console.log('Get Dashboard API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Get Dashboard API error:', e);
+    return null;
+  }
+};
+
+// Get all teams
+export const getTeamsAPI = async () => {
+  try {
+    const url = `${API_BASE}/dashboard/api/teams/`;
+    console.log('Get Teams API URL:', url);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    console.log('Get Teams API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Get Teams API error:', e);
+    return null;
+  }
+};
+
+// Get all recognitions
+export const getAllRecognitionsAPI = async () => {
+  try {
+    const url = `${API_BASE}/dashboard/api/recognition/`;
+    console.log('Get All Recognitions API URL:', url);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    console.log('Get All Recognitions API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Get All Recognitions API error:', e);
+    return null;
+  }
+};
+
+// Admin: Get all categories
+export const getCategoriesAPI = async () => {
+  try {
+    const url = `${API_BASE}/admin-dashboard/api/categories/`;
+    console.log('Get Categories API URL:', url);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    console.log('Get Categories API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Get Categories API error:', e);
+    return null;
+  }
+};
+
+// Admin: Create category
+export const createCategoryAPI = async (category: { name: string }) => {
+  try {
+    const url = `${API_BASE}/admin-dashboard/api/categories/create/`;
+    console.log('Create Category API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(category),
+    });
+    const data = await res.json();
+    console.log('Create Category API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Create Category API error:', e);
+    return null;
+  }
+};
+
+// Admin: Delete category
+export const deleteCategoryAPI = async (category_id: number) => {
+  try {
+    const url = `${API_BASE}/admin-dashboard/api/categories/${category_id}/delete/`;
+    console.log('Delete Category API URL:', url);
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    console.log('Delete Category API response:', res.status);
+    return res.status === 204;
+  } catch (e) {
+    console.log('Delete Category API error:', e);
+    return false;
+  }
+};
+
+// Admin: Get all users
+export const getUsersAPI = async () => {
+  try {
+    const url = `${API_BASE}/admin-dashboard/api/users/`;
+    console.log('Get Users API URL:', url);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    console.log('Get Users API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Get Users API error:', e);
+    return null;
+  }
+};
+
+// Admin: Create user
+export const createUserAPI = async (user: any) => {
+  try {
+    const url = `${API_BASE}/admin-dashboard/api/users/create/`;
+    console.log('Create User API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(user),
+    });
+    const data = await res.json();
+    console.log('Create User API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Create User API error:', e);
+    return null;
+  }
+};
+
+// Admin: Delete user
+export const deleteUserAPI = async (user_id: number) => {
+  try {
+    const url = `${API_BASE}/admin-dashboard/api/users/${user_id}/delete/`;
+    console.log('Delete User API URL:', url);
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    console.log('Delete User API response:', res.status);
+    return res.status === 204;
+  } catch (e) {
+    console.log('Delete User API error:', e);
+    return false;
+  }
+};
+
+// Admin: Get all skills
+export const getSkillsAPI = async () => {
+  try {
+    const url = `${API_BASE}/admin-dashboard/skills/`;
+    console.log('Get Skills API URL:', url);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    console.log('Get Skills API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Get Skills API error:', e);
+    return null;
+  }
+};
+
+// Admin: Create skill
+export const createSkillAPI = async (skill: { name: string }) => {
+  try {
+    const url = `${API_BASE}/admin-dashboard/skills/create/`;
+    console.log('Create Skill API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(skill),
+    });
+    const data = await res.json();
+    console.log('Create Skill API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Create Skill API error:', e);
+    return null;
+  }
+};
+
+// Admin: Delete skill
+export const deleteSkillAPI = async (skill_id: number) => {
+  try {
+    const url = `${API_BASE}/admin-dashboard/skills/${skill_id}/delete/`;
+    console.log('Delete Skill API URL:', url);
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    console.log('Delete Skill API response:', res.status);
+    return res.status === 204;
+  } catch (e) {
+    console.log('Delete Skill API error:', e);
+    return false;
+  }
 };
 
 // Authentication helper
