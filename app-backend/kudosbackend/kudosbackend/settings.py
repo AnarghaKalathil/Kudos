@@ -142,9 +142,12 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Your API Title",
     "DESCRIPTION": "API documentation for your Django project.",
     "VERSION": "1.0.0",
-    # Optional settings:
-    # 'SERVE_INCLUDE_SCHEMA': False,
-    # 'COMPONENT_SPLIT_REQUEST': True,
+
+    # Prevent trying to emit schema to disk
+    "ENABLE_FILE_GENERATION": False,  # ✅ this avoids I/O errors
+
+    # Optional: include schema in Swagger/OpenAPI UI
+    "SERVE_INCLUDE_SCHEMA": True,
 }
 
 # Allow all origins
