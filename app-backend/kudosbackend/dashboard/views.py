@@ -172,7 +172,7 @@ class RecognitionData(APIView):
 
 
 class SkillsData(APIView):
-    permission_classes = [AllowAny, ]
+    permission_classes = [IsAuthenticated, ]
 
     @extend_schema(
         request=serializer_obj.RecognitionSerializer,
@@ -216,7 +216,7 @@ class SkillsData(APIView):
 
 
 class SkillDelete(APIView):
-    permission_classes = [AllowAny, ]
+    permission_classes = [IsAuthenticated, ]
 
     @extend_schema(
         parameters=[
@@ -248,7 +248,7 @@ class SkillDelete(APIView):
 
 
 class TeamList(APIView):
-    permission_classes = [AllowAny, ]
+    permission_classes = [IsAuthenticated, ]
 
     @extend_schema(
         summary="Get All Employee List",
@@ -303,7 +303,7 @@ class TeamList(APIView):
 
 
 class RecognitionStatusChange(APIView):
-    permission_classes = [AllowAny, ]
+    permission_classes = [IsAuthenticated, ]
 
     @extend_schema(
         request=StatusUpdateSerializer,
