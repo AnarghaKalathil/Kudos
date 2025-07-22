@@ -14,7 +14,7 @@ class RecognitionListSerializer(serializers.ModelSerializer):
         model = Recognition
         fields = ["category", "message", "is_reviewed",
                   "reviewed_at", "created_at", "sender",
-                  "reviewer", "skills"]
+                  "reviewer", "skills", "status"]
 
     def get_sender(self, obj):
         return obj.sender.username
@@ -27,6 +27,7 @@ class RecognitionListSerializer(serializers.ModelSerializer):
 
     def get_category(self, obj):
         return obj.category.name
+
 
 class RecognitionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,6 +58,8 @@ class UserSerializer(serializers.ModelSerializer):
             "designation",
             "department",
         ]
+
+
 class StatusUpdateSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     status = serializers.ChoiceField(choices=["PENDING", "REJECTED", "APPROVED"])
