@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { giveRecognitionAPI } from "@/lib/api";
+import { getTeamsAPI, getCategoriesAPI, giveRecognitionAPI } from "@/lib/api";
 
 interface Employee {
   id: string;
@@ -22,14 +22,14 @@ type Props = {
   selectedEmployee: Employee | null;
 }
 
-const mockEmployees: Employee[] = [
-  { id: "1", name: "Alice Chen", role: "Senior Frontend Developer", department: "Engineering", initials: "AC" },
-  { id: "2", name: "Bob Smith", role: "Backend Engineer", department: "Engineering", initials: "BS" },
-  { id: "3", name: "Charlie Kim", role: "Product Manager", department: "Product", initials: "CK" },
-  { id: "4", name: "Diana Lee", role: "UX Designer", department: "Design", initials: "DL" },
-  { id: "5", name: "Eve Wilson", role: "DevOps Engineer", department: "Engineering", initials: "EW" },
-  { id: "6", name: "Frank Davis", role: "Data Scientist", department: "Analytics", initials: "FD" }
-];
+// const mockEmployees: Employee[] = [
+//   { id: "1", name: "Alice Chen", role: "Senior Frontend Developer", department: "Engineering", initials: "AC" },
+//   { id: "2", name: "Bob Smith", role: "Backend Engineer", department: "Engineering", initials: "BS" },
+//   { id: "3", name: "Charlie Kim", role: "Product Manager", department: "Product", initials: "CK" },
+//   { id: "4", name: "Diana Lee", role: "UX Designer", department: "Design", initials: "DL" },
+//   { id: "5", name: "Eve Wilson", role: "DevOps Engineer", department: "Engineering", initials: "EW" },
+//   { id: "6", name: "Frank Davis", role: "Data Scientist", department: "Analytics", initials: "FD" }
+// ];
 
 const categories = [
   "Mentoring",
@@ -63,14 +63,26 @@ export const GiveRecognition = ({ selectedEmployee,isFromGiveStar }: GiveRecogni
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
   const [reviewer, setReviewer] = useState<string>("");
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
 
   const { toast } = useToast();
 
 useEffect(() => {
-  if (isFromGiveStar && selectedEmployee?.id) {
-    setSelectedEmployees(selectedEmployee.id);
-  }
-}, [selectedEmployee, isFromGiveStar]);
+  getTeamsAPI().then((data) => {
+    if (Array.isArray(data)) setEmployees(data);
+  });
+  getCategoriesAPI().then((data) => {
+    if (Array.isArray(data)) setCategories(data);
+  });
+}, []);
+
+
+  useEffect(() => {
+    if (isFromGiveStar && selectedEmployee?.id) {
+      setSelectedEmployees(selectedEmployee.id);
+    }
+  }, [selectedEmployee, isFromGiveStar]);
 
 
   const handleAddTag = (tag: string) => {
@@ -95,13 +107,19 @@ useEffect(() => {
       return;
     }
     try {
+      // Find integer IDs for receiver, category, reviewer
+      const receiverId = parseInt(selectedEmployees);
+      const categoryId = parseInt(category);
+      const reviewerId = parseInt(reviewer);
+      const sender = JSON.parse(localStorage.getItem('user') || '{}').user_id;
+      // For skills, you may need to map tag names to IDs if available
       const response = await giveRecognitionAPI({
-        toUserId: selectedEmployees,
-        stars: 1, // or allow user to select stars if needed
-        comment: message,
-        tags,
-        category,
-        reviewerId: reviewer,
+        sender,
+        receiver: receiverId,
+        category: categoryId,
+        message,
+        skills: [], // TODO: map tags to skill IDs if available
+        reviewer: reviewerId,
       });
       if (response.success) {
         toast({
@@ -130,7 +148,7 @@ useEffect(() => {
     }
   };
 
-  const selectedEmployeeData = mockEmployees.find(emp => emp.id === selectedEmployees);
+  const selectedEmployeeData = employees.find(emp => emp.id === parseInt(selectedEmployees));
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 px-4 sm:px-0 mt-10">
@@ -139,7 +157,7 @@ useEffect(() => {
         <p className="text-lg text-muted-foreground">Recognize a teammate's contribution and expertise</p>
       </div>
 
-      <Card className="shadow-2xl bg-white/80 backdrop-blur rounded-2xl">
+      <Card className="shadow-xl bg-white/80 backdrop-blur rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl font-bold">
             <Star className="w-6 h-6 text-star" /> Recognition Details
@@ -156,7 +174,7 @@ useEffect(() => {
                   <SelectValue placeholder="Select a teammate" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockEmployees.map(employee => (
+                  {employees.map(employee => (
                     <SelectItem key={employee.id} value={employee.id}>
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
@@ -197,7 +215,7 @@ useEffect(() => {
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -279,7 +297,7 @@ useEffect(() => {
                   <SelectValue placeholder="Select reviewer" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockEmployees.map(employee => (
+                  {employees.map(employee => (
                     <SelectItem key={employee.id} value={employee.id}>
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8 shadow border-2 border-primary/30">

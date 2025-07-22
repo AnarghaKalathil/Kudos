@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -10,6 +10,7 @@ import { MessageCircle, Star } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter ,DialogOverlay} from "@/components/ui/dialog";
 import { changeRecognitionStatusAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { getAllRecognitionsAPI } from "@/lib/api";
 
 // Recognition interface
 interface Recognition {
@@ -24,53 +25,6 @@ interface Recognition {
   status: "pending" | "accepted" | "rejected";
 }
 
-const initialRecognitions: Recognition[] = [
-  {
-    id: "r1",
-    from: "Alice Cheng",
-    to: "Bob Smith",
-    skill: "React Debug",
-    category: "Frontend",
-    date: "2 hours ago",
-    message: "Great work tracking down that nasty bug!",
-    tags: ["JS", "Bug Fix", "Hooks"],
-    status: "pending"
-  },
-  {
-    id: "r2",
-    from: "Charlie Kim",
-    to: "Diana Lee",
-    skill: "API Design",
-    category: "Backend",
-    date: "4 hours ago",
-    message: "Loved your clean API structure!",
-    tags: ["REST", "Design", "Docs"],
-    status: "pending"
-  },
-  {
-    id: "r3",
-    from: "Eve Wilson",
-    to: "Frank Davis",
-    skill: "Docker Setup",
-    category: "DevOps",
-    date: "1 day ago",
-    message: "Setup worked flawlessly across environments!",
-    tags: ["Docker", "CI/CD"],
-    status: "accepted"
-  },
-  {
-    id: "r4",
-    from: "Jake Brown",
-    to: "Sarah Green",
-    skill: "Tailwind Mastery",
-    category: "Frontend",
-    date: "3 days ago",
-    message: "Loved the clean responsive UI you built.",
-    tags: ["Tailwind", "CSS", "Design"],
-    status: "rejected"
-  }
-];
-
 const categoryColors: Record<string, string> = {
   Frontend: "bg-primary/10 text-primary",
   Backend: "bg-accent/10 text-accent",
@@ -80,7 +34,7 @@ const categoryColors: Record<string, string> = {
 type ActionType = "accept" | "reject" | "moveToAccepted" | null;
 
 export default function RecognitionTabs() {
-  const [recognitions, setRecognitions] = useState(initialRecognitions);
+  const [recognitions, setRecognitions] = useState<Recognition[]>([]);
   const [activeTab, setActiveTab] = useState<"pending" | "accepted" | "rejected">("pending");
 
   // Modal state
@@ -89,6 +43,12 @@ export default function RecognitionTabs() {
   const [actionType, setActionType] = useState<ActionType>(null);
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    getAllRecognitionsAPI().then((data) => {
+      if (Array.isArray(data)) setRecognitions(data);
+    });
+  }, []);
 
   const handleStatusChange = async (id: string, newStatus: Recognition["status"]) => {
     // Call backend API

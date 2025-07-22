@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Filter, Star, MessageCircle, Trophy,User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { getTeamsAPI } from "@/lib/api";
 
 interface Employee {
   id: string;
@@ -28,106 +29,33 @@ interface TagSearchProps {
   onGiveStar: (employee: Employee) => void;
 }
 
-const mockEmployees: Employee[] = [
-
-  {
-    id: "1",
-    name: "Alice Chen",
-    role: "Senior Frontend Developer",
-    department: "Engineering",
-    stars: 42,
-    skills: ["React", "TypeScript", "UI/UX", "Performance", "Testing"],
-    recognitions: [
-      { skill: "React", count: 8, category: "Technical Excellence" },
-      { skill: "TypeScript", count: 6, category: "Technical Excellence" },
-      { skill: "UI/UX", count: 4, category: "Collaboration" },
-      { skill: "Performance", count: 3, category: "Problem Solving" }
-    ],
-    email: "alice.chen@company.com",
-    initials: "AC"
-  },
-  {
-    id: "2",
-    name: "Bob Smith",
-    role: "Backend Engineer",
-    department: "Engineering",
-    stars: 38,
-    skills: ["Node.js", "API Design", "Database", "DevOps", "Security"],
-    recognitions: [
-      { skill: "Node.js", count: 7, category: "Technical Excellence" },
-      { skill: "API Design", count: 5, category: "Technical Excellence" },
-      { skill: "Database", count: 4, category: "Problem Solving" },
-      { skill: "DevOps", count: 3, category: "Innovation" }
-    ],
-    email: "bob.smith@company.com",
-    initials: "BS"
-  },
-  {
-    id: "3",
-    name: "Eve Wilson",
-    role: "DevOps Engineer",
-    department: "Engineering",
-    stars: 31,
-    skills: ["Docker", "Kubernetes", "CI/CD", "AWS", "Monitoring"],
-    recognitions: [
-      { skill: "Docker", count: 6, category: "Technical Excellence" },
-      { skill: "Kubernetes", count: 4, category: "Technical Excellence" },
-      { skill: "CI/CD", count: 3, category: "Innovation" },
-      { skill: "AWS", count: 2, category: "Problem Solving" }
-    ],
-    email: "eve.wilson@company.com",
-    initials: "EW"
-  },
-  {
-    id: "4",
-    name: "Diana Lee",
-    role: "UX Designer",
-    department: "Design",
-    stars: 29,
-    skills: ["Figma", "User Research", "Prototyping", "Design Systems", "Accessibility"],
-    recognitions: [
-      { skill: "Figma", count: 5, category: "Technical Excellence" },
-      { skill: "User Research", count: 4, category: "Knowledge Sharing" },
-      { skill: "Prototyping", count: 3, category: "Innovation" },
-      { skill: "Design Systems", count: 2, category: "Collaboration" }
-    ],
-    email: "diana.lee@company.com",
-    initials: "DL"
-  },
-  {
-    id: "5",
-    name: "Frank Davis",
-    role: "Data Scientist",
-    department: "Analytics",
-    stars: 22,
-    skills: ["Python", "Machine Learning", "SQL", "Statistics", "Data Visualization"],
-    recognitions: [
-      { skill: "Python", count: 4, category: "Technical Excellence" },
-      { skill: "Machine Learning", count: 3, category: "Innovation" },
-      { skill: "SQL", count: 3, category: "Problem Solving" },
-      { skill: "Statistics", count: 2, category: "Knowledge Sharing" }
-    ],
-    email: "frank.davis@company.com",
-    initials: "FD"
-  }
-];
-
-const allSkills = Array.from(new Set(mockEmployees.flatMap(emp => emp.skills))).sort();
-
 export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSkill, setSelectedSkill] = useState("any-skill");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [minStars, setMinStars] = useState("0");
    const [viewingEmployee, setViewingEmployee] = useState(null);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
 
-  const filteredEmployees = mockEmployees.filter(employee => {
+  useEffect(() => {
+    getTeamsAPI().then((data) => {
+      if (Array.isArray(data)) {
+        setEmployees(data);
+        // Extract all unique skills
+        const all = Array.from(new Set(data.flatMap(emp => emp.skills || []))).sort();
+        setSkills(all);
+      }
+    });
+  }, []);
+
+  const filteredEmployees = employees.filter(employee => {
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+      (employee.skills || []).some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesSkill = selectedSkill === "any-skill" || employee.skills.includes(selectedSkill);
+    const matchesSkill = selectedSkill === "any-skill" || (employee.skills || []).includes(selectedSkill);
     const matchesDepartment = selectedDepartment === "all" || employee.department === selectedDepartment;
     const matchesMinStars = employee.stars >= (parseInt(minStars) || 0);
 
@@ -139,9 +67,9 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
     return recognition ? recognition.count : 0;
   };
 
-  const departments = ["all", ...new Set(mockEmployees.map(emp => emp.department))];
+  const departments = ["all", ...new Set(employees.map(emp => emp.department))];
 
-  const popularSkills = allSkills.slice(0, 8);
+  const popularSkills = skills.slice(0, 8);
 
   return (
     <div className="space-y-10 mt-10">
@@ -149,7 +77,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
         <h2 className="text-3xl font-extrabold text-foreground mb-1">Find Experts</h2>
         <p className="text-lg text-muted-foreground">Search for teammates by skills and expertise</p>
       </div>
-      <Card className="shadow-2xl bg-white/80 backdrop-blur rounded-2xl">
+      <Card className="shadow-xl bg-white/80 backdrop-blur rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl font-bold">
             <Search className="w-6 h-6" /> Search Filters
@@ -178,7 +106,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="any-skill">Any skill</SelectItem>
-                  {allSkills.map(skill => (
+                  {skills.map(skill => (
                     <SelectItem key={skill} value={skill}>{skill}</SelectItem>
                   ))}
                 </SelectContent>
@@ -187,7 +115,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
           </div>
         </CardContent>
       </Card>
-      <Card className="shadow-2xl bg-white/80 backdrop-blur rounded-2xl">
+      <Card className="shadow-xl bg-white/80 backdrop-blur rounded-2xl">
         <CardHeader>
           <CardTitle className="text-xl font-bold">Popular Skills</CardTitle>
           <CardDescription className="text-base">Click on a skill to find experts</CardDescription>
@@ -195,7 +123,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
         <CardContent>
           <div className="flex flex-wrap gap-3">
             {popularSkills.map(skill => {
-              const expertCount = mockEmployees.filter(emp => emp.skills.includes(skill)).length;
+              const expertCount = employees.filter(emp => (emp.skills || []).includes(skill)).length;
               return (
                 <Badge
                   key={skill}
@@ -213,7 +141,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {filteredEmployees.map((employee) => (
           <div className="flex flex-col h-full">
-            <Card key={employee.id} className="flex flex-col flex-1 shadow-2xl bg-white/80 backdrop-blur rounded-2xl hover:scale-[1.02] transition-transform h-full min-h-[190px]">
+            <Card key={employee.id} className="flex flex-col flex-1 shadow-xl bg-white/80 backdrop-blur rounded-2xl hover:scale-[1.02] transition-transform h-full min-h-[190px]">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-4">
                   <Avatar className="w-14 h-14 border-2 border-primary/30 shadow">
@@ -256,7 +184,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
       </div>
       {viewingEmployee && (
         <Dialog open={!!viewingEmployee} onOpenChange={() => setViewingEmployee(null)}>
-          <DialogContent className="max-w-3xl rounded-2xl shadow-2xl bg-white/90 backdrop-blur-lg">
+          <DialogContent className="max-w-3xl rounded-2xl shadow-xl bg-white/90 backdrop-blur-lg">
             <Card className="shadow-none bg-transparent w-full">
               <CardContent className="pt-8 pb-6">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
@@ -303,7 +231,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                 <div className="mt-4 space-y-2">
                   <h4 className="text-base font-semibold text-foreground">All Badges</h4>
                   <div className="flex flex-wrap gap-2">
-                    {viewingEmployee.skills.map((skill, index) => (
+                    {(viewingEmployee.skills || []).map((skill, index) => (
                       <Badge
                         key={index}
                         variant="outline"

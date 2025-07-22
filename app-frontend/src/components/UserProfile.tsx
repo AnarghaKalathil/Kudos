@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star, Award, Trophy, Calendar, MessageCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { getUserProfileAPI, getAllRecognitionsAPI } from "@/lib/api";
 
 interface Recognition {
   id: string;
@@ -18,53 +19,6 @@ interface Recognition {
   reviewer: string;
   status: "approved" | "pending" | "rejected";
 }
-
-const mockRecognitions: Recognition[] = [
-  {
-    id: "1",
-    from: "Alice Chen",
-    fromInitials: "AC",
-    category: "Technical Excellence",
-    message: "John helped me implement a complex React component with excellent performance optimization techniques.",
-    tags: ["React", "Performance", "TypeScript"],
-    date: "2024-01-15",
-    reviewer: "Tech Lead",
-    status: "approved"
-  },
-  {
-    id: "2",
-    from: "Bob Smith",
-    fromInitials: "BS",
-    category: "Mentoring",
-    message: "John provided excellent guidance on API design principles and helped me understand best practices.",
-    tags: ["API Design", "Mentoring", "Backend"],
-    date: "2024-01-10",
-    reviewer: "Manager",
-    status: "approved"
-  },
-  {
-    id: "3",
-    from: "Charlie Kim",
-    fromInitials: "CK",
-    category: "Problem Solving",
-    message: "John quickly identified and resolved a critical bug in our authentication system.",
-    tags: ["Authentication", "Bug Fix", "Security"],
-    date: "2024-01-08",
-    reviewer: "Manager",
-    status: "approved"
-  },
-  {
-    id: "4",
-    from: "Diana Lee",
-    fromInitials: "DL",
-    category: "Collaboration",
-    message: "John collaborated effectively with the design team to implement pixel-perfect UI components.",
-    tags: ["UI/UX", "Collaboration", "Frontend"],
-    date: "2024-01-05",
-    reviewer: "Design Lead",
-    status: "pending"
-  }
-];
 
 const categoryColors = {
   "Technical Excellence": "bg-primary/10 text-primary",
@@ -79,9 +33,20 @@ const categoryColors = {
 
 export const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  
-  const approvedRecognitions = mockRecognitions.filter(r => r.status === "approved");
-  const pendingRecognitions = mockRecognitions.filter(r => r.status === "pending");
+  const [recognitions, setRecognitions] = useState<Recognition[]>([]);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    getUserProfileAPI().then((data) => {
+      if (data) setUser(data);
+    });
+    getAllRecognitionsAPI().then((data) => {
+      if (Array.isArray(data)) setRecognitions(data);
+    });
+  }, []);
+
+  const approvedRecognitions = recognitions.filter(r => r.status === "approved");
+  const pendingRecognitions = recognitions.filter(r => r.status === "pending");
   
   const totalStars = approvedRecognitions.length;
   const categoryBreakdown = approvedRecognitions.reduce((acc, rec) => {
@@ -106,7 +71,7 @@ export const UserProfile = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-10 px-4 sm:px-0 mt-10">
       {/* Profile Header */}
-      <Card className="shadow-2xl bg-white/80 backdrop-blur rounded-2xl">
+      <Card className="shadow-xl bg-white/80 backdrop-blur rounded-2xl">
         <CardContent className="pt-8 pb-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
             <Avatar className="w-24 h-24 border-4 border-primary/30 shadow-lg">
@@ -115,9 +80,9 @@ export const UserProfile = () => {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-1">John Doe</h1>
-              <p className="text-lg sm:text-xl text-muted-foreground font-medium">Senior Full Stack Developer</p>
-              <p className="text-base text-muted-foreground mb-2">Engineering • john.doe@company.com</p>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-1">{user?.first_name} {user?.last_name}</h1>
+              <p className="text-lg sm:text-xl text-muted-foreground font-medium">{user?.designation || user?.role}</p>
+              <p className="text-base text-muted-foreground mb-2">{user?.department} • {user?.email}</p>
               <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 mt-4">
                 <div className="flex items-center gap-2">
                   <Star className="w-6 h-6 text-star" />

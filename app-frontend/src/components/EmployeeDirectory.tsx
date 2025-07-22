@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Plus,Star} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { getTeamsAPI } from "@/lib/api";
 
 interface EmployeeDirectoryProps {
   onGiveStar: (employee: { id: string; name: string }) => void;
@@ -21,113 +22,32 @@ interface Employee {
   level: number;
 }
 
-const mockEmployees: Employee[] = [
-  {
-    id: "1",
-    name: "Alice Chen",
-    role: "Senior Frontend Developer",
-    stars: 42,
-    skills: ["React", "TypeScript", "UI/UX", "Performance"],
-    email: "alice.chen@company.com",
-    initials: "AC",
-    level: 5
-  },
-  {
-    id: "2",
-    name: "Bob Smith",
-    role: "Backend Engineer",
-    stars: 38,
-    skills: ["Node.js", "API Design", "Database", "DevOps"],
-    email: "bob.smith@company.com",
-    initials: "BS",
-    level: 4
-  },
-  {
-    id: "3",
-    name: "Charlie Kim",
-    role: "Product Manager",
-    stars: 35,
-    skills: ["Strategy", "Analytics", "User Research", "Agile"],
-    email: "charlie.kim@company.com",
-    initials: "CK",
-    level: 4
-  },
-  {
-    id: "4",
-    name: "Diana Lee",
-    role: "UX Designer",
-    stars: 29,
-    skills: ["Figma", "User Research", "Prototyping", "Design Systems"],
-    email: "diana.lee@company.com",
-    initials: "DL",
-    level: 3
-  },
-  {
-    id: "5",
-    name: "Eve Wilson",
-    role: "DevOps Engineer",
-    stars: 31,
-    skills: ["Docker", "Kubernetes", "CI/CD", "AWS"],
-    email: "eve.wilson@company.com",
-    initials: "EW",
-    level: 4
-  },
-  {
-    id: "6",
-    name: "Frank Davis",
-    role: "Data Scientist",
-    stars: 22,
-    skills: ["Python", "Machine Learning", "SQL", "Statistics"],
-    email: "frank.davis@company.com",
-    initials: "FD",
-    level: 3
-  },
-    {
-    id: "7",
-    name: "Xavier",
-    role: "Data Scientist",
-    stars: 10,
-    skills: ["Python", "Machine Learning", "SQL", "Statistics"],
-    email: "frank.davis@company.com",
-    initials: "FD",
-    level: 3
-  },
-    {
-    id: "8",
-    name: "lrank aavis",
-    role: "Data Scientist",
-    stars: 20,
-    skills: ["Python", "Machine Learning", "SQL", "Statistics"],
-    email: "frank.davis@company.com",
-    initials: "FD",
-    level: 3
-  }
-];
-
 export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
-
   const [currentPage, setCurrentPage] = useState(1);
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
-  const filteredEmployees = mockEmployees.filter(employee => {
+  useEffect(() => {
+    getTeamsAPI().then((data) => {
+      if (Array.isArray(data)) setEmployees(data);
+    });
+  }, []);
+
+  const filteredEmployees = employees.filter(employee => {
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    
-    return matchesSearch 
+      (employee.skills || []).some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesSearch;
   });
 
-const employeesPerPage = 6;
-
-const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
-const indexOfLastEmployee = currentPage * employeesPerPage;
-const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
-
-const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const employeesPerPage = 6;
+  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
+  const indexOfLastEmployee = currentPage * employeesPerPage;
+  const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
+  const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
 
   return (
@@ -152,7 +72,7 @@ const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
         {currentEmployees.map((employee) => (
           <div className="flex flex-col h-full">
-            <Card key={employee.id} className="flex flex-col flex-1 shadow-2xl bg-white/80 backdrop-blur rounded-2xl hover:scale-[1.02] transition-transform h-full min-h-[240px]">
+            <Card key={employee.id} className="flex flex-col flex-1 shadow-xl bg-white/80 backdrop-blur rounded-2xl hover:scale-[1.02] transition-transform h-full min-h-[240px]">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-4">
                   <Avatar className="w-14 h-14 border-2 border-primary/30 shadow">

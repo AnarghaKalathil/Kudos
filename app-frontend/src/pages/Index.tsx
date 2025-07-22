@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, Users, Trophy, Search, Plus, Award, Target, LogOut,MessageCircle, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { UserProfile } from "@/components/UserProfile";
 import { TagSearch } from "@/components/TagSearch";
 import RecognitionTabs from "@/components/Leaderboard";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { logoutAPI } from "@/lib/api";
+import { logoutAPI, getUserProfileAPI } from "@/lib/api";
 
 
 const Index = () => {
@@ -18,6 +18,13 @@ const Index = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<{ id: string; name: string } | null>(null);
   const [isFromGiveStar, setIsFromGiveStar] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    getUserProfileAPI().then((data) => {
+      if (data) setUser(data);
+    });
+  }, []);
 
     const handleLogout = async () => {
     await logoutAPI();
@@ -33,13 +40,14 @@ const Index = () => {
           <PanelLeft className="w-7 h-7 text-primary" />
         </button>
         <div className="flex items-center gap-3">
+          <h3 className="text-xl font-bold text-foreground tracking-tight justify-start">Kudos</h3>
           <div className="w-10 h-10 bg-gradient-to-tr from-primary to-accent rounded-full flex items-center justify-center shadow">
             <span className="text-base font-bold text-primary-foreground">JD</span>
           </div>
         </div>
       </div>
       {/* Sidebar (desktop) */}
-      <aside className="hidden md:flex flex-col w-64 min-h-screen bg-card/90 backdrop-blur-lg shadow-2xl border-r border-border px-0 py-8 fixed left-0 top-0 z-40">
+      <aside className="hidden md:flex flex-col w-64 min-h-screen bg-card/90 backdrop-blur-lg shadow-xl border-r border-border px-0 py-8 fixed left-0 top-0 z-40">
         <div className="flex flex-col items-center gap-6 mb-10">
           <div className="w-14 h-14 bg-gradient-to-tr from-primary to-accent rounded-2xl flex items-center justify-center shadow-md">
             <Star className="w-8 h-8 text-primary-foreground drop-shadow" />
@@ -115,8 +123,8 @@ const Index = () => {
           {/* Overview */}
           {activeTab === 'overview' && (
             <section>
-              <div className="bg-white/80 backdrop-blur-lg border shadow-2xl rounded-2xl p-8 mb-12 mt-10 flex flex-col items-center text-center">
-                <h2 className="text-3xl font-extrabold mb-2 text-foreground">Welcome back, John! ✨</h2>
+              <div className="bg-white/80 backdrop-blur-md border shadow-xl rounded-2xl p-8 mb-12 mt-10 flex flex-col items-center text-center">
+                <h2 className="text-3xl font-extrabold mb-2 text-foreground">Welcome back, {user?.first_name || user?.username || "User"}! ✨</h2>
                 <p className="text-lg text-muted-foreground mb-4">Ready to spread some appreciation? You have <span className='font-bold text-primary'>3</span> pending recognition requests to review.</p>
                 <Button className="bg-gradient-to-r from-primary to-accent text-white px-6 py-3 rounded-xl shadow-lg text-lg font-semibold hover:scale-105 transition-transform" onClick={() => setActiveTab('review')}>Review Requests</Button>
               </div>
@@ -147,7 +155,7 @@ const Index = () => {
                             <CardDescription className="text-base">Search by skills and tags to find the right person</CardDescription>
                           </CardHeader>
                           <CardContent className="flex-1 flex flex-col justify-end">
-                            <Button variant="outline" className="w-full py-2 rounded-lg font-semibold hover:bg-primary/10 hover:text-primary transition" onClick={() => setActiveTab('search')}> <Search className="w-5 h-5 mr-2" /> Search Skills</Button>
+                            <Button variant="outline" className="w-full  py-2 rounded-lg font-semibold hover:bg-primary/10 hover:text-primary transition" onClick={() => setActiveTab('search')}> <Search className="w-5 h-5 mr-2" /> Search Skills</Button>
                           </CardContent>
                         </>
                       )}

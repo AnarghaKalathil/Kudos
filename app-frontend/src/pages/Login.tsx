@@ -29,14 +29,19 @@ const Login = () => {
     setIsLoading(true);
     try {
       const response = await loginAPI({ email: data.email, password: data.password });
-      if (response.success) {
-        // Store user data in localStorage if provided
-        if (response.user) {
-          localStorage.setItem("user", JSON.stringify(response.user));
-        }
+      console.log('Login API (frontend) response:', response);
+      if (response && response.data && response.status) {
+        localStorage.setItem('authToken', response.data.access_token);
+        localStorage.setItem('refreshToken', response.data.refresh_token);
+        localStorage.setItem('user', JSON.stringify({
+          user_id: response.data.user_id,
+          username: response.data.username,
+          email: response.data.email,
+          ...response.data.user_data
+        }));
         toast({
           title: "Login successful!",
-          description: "Welcome back to Kudos",
+          description: response.message || "Welcome back to Kudos",
         });
         window.location.href = "/dashboard";
       } else {
