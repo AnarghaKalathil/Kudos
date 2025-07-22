@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Stack, Paper } from '@mui/material';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 
@@ -10,13 +10,13 @@ const UsersPage: React.FC = () => {
   ]);
 
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password:'', designation: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', designation: '' });
   const [editId, setEditId] = useState<number | null>(null);
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const handleOpen = () => {
-    setFormData({ name: '', email: '',password:'', designation: '' });
+    setFormData({ name: '', email: '', password: '', designation: '' });
     setEditId(null);
     setOpen(true);
     setIsDeleteConfirm(false);
@@ -38,6 +38,7 @@ const UsersPage: React.FC = () => {
       setOpen(true);
     }
   };
+
   const handleSubmit = () => {
     if (isDeleteConfirm && deleteId !== null) {
       setUsers(users.filter((u) => u.id !== deleteId));
@@ -58,18 +59,33 @@ const UsersPage: React.FC = () => {
   ];
 
   return (
-    <Box p={3}>
-      <Typography variant="h5">Users</Typography>
-      <Button variant="contained" onClick={handleOpen} sx={{ mb: 2 }}>
-        Add User
-      </Button>
+    <Box p={4}>
+      {/* Centered Project Title */}
+      <Box textAlign="center" mb={4}>
+        <Typography variant="h3" fontWeight={700} color="primary">
+          Kudos
+        </Typography>
+      </Box>
 
-      <DataTable
-        columns={columns}
-        rows={users}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {/* Users Table Section */}
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h5" fontWeight={600}>
+            Users
+          </Typography>
+          <Button variant="contained" onClick={handleOpen}>
+            Add User
+          </Button>
+        </Stack>
+
+        <DataTable
+          columns={columns}
+          rows={users}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Paper>
+
       <FormModal
         open={open}
         handleClose={() => setOpen(false)}

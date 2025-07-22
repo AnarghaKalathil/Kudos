@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Stack, Paper } from '@mui/material';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 
@@ -19,12 +19,14 @@ const CategoriesPage: React.FC = () => {
     setFormData({ categoryName: '' });
     setEditId(null);
     setOpen(true);
+    setIsDeleteConfirm(false);
   };
 
   const handleEdit = (category: any) => {
     setFormData(category);
     setEditId(category.id);
     setOpen(true);
+    setIsDeleteConfirm(false);
   };
 
   const handleDelete = (id: number) => {
@@ -42,7 +44,7 @@ const CategoriesPage: React.FC = () => {
     if (isDeleteConfirm && deleteId !== null) {
       setCategories(categories.filter((u) => u.id !== deleteId));
     } else if (editId !== null) {
-      setCategories(categories.map((u) => (u.id === editId ? { ...formData, id: editId , updatedTime} : u)));
+      setCategories(categories.map((u) => (u.id === editId ? { ...formData, id: editId, updatedTime } : u)));
     } else {
       setCategories([...categories, { ...formData, id: Date.now(), updatedTime }]);
     }
@@ -57,18 +59,31 @@ const CategoriesPage: React.FC = () => {
   ];
 
   return (
-    <Box p={3}>
-      <Typography variant="h5">Categories</Typography>
-      <Button variant="contained" onClick={handleOpen} sx={{ mb: 2 }}>
-        Add Category
-      </Button>
+    <Box p={4}>
+      {/* Centered Project Title */}
+      <Box textAlign="center" mb={4}>
+        <Typography variant="h3" fontWeight={700} color="primary">
+          Kudos
+        </Typography>
+      </Box>
 
-      <DataTable
-        columns={columns}
-        rows={categories}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h5" fontWeight={600}>
+            Categories
+          </Typography>
+          <Button variant="contained" onClick={handleOpen}>
+            Add Category
+          </Button>
+        </Stack>
+
+        <DataTable
+          columns={columns}
+          rows={categories}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Paper>
 
       <FormModal
         open={open}
@@ -76,9 +91,8 @@ const CategoriesPage: React.FC = () => {
         formData={formData}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
-        title={ isDeleteConfirm ? 'Delete Confirmation' :editId ? 'Edit Category' : 'Add Category'}
+        title={isDeleteConfirm ? 'Delete Confirmation' : editId ? 'Edit Category' : 'Add Category'}
         isDeleteConfirm={isDeleteConfirm}
-
       />
     </Box>
   );
