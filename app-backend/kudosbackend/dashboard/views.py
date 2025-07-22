@@ -1,13 +1,14 @@
-from django.db.models import Q
+from django.db.models import Q, Count
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from collections import defaultdict
 from accounts.models import KudosUser
+from admin_dashboard.serializers import CategorySerializer
 from dashboard.models import Recognition, Star, RecognitionStatus
-from admin_dashboard.models import Skills
+from admin_dashboard.models import Skills, Category
 from dashboard import serializer as serializer_obj
 from dashboard.serializer import StatusUpdateSerializer, RecognitionListSerializer, SkillSerializer, \
     RecognitionSerializer
@@ -20,7 +21,7 @@ class Dashboard(APIView):
         summary="Get All User Daata",
         tags=["Accounts API's"],
     )
-    def get(self,request):
+    def get(self, request):
         try:
             user = request.user
             star_count = Star.objects.filter(
@@ -41,14 +42,45 @@ class Dashboard(APIView):
                 recognitions__in=approved_user_recognitions
             ).distinct()
 
+            # Top 5 users with most stars received
+            top_users_qs = KudosUser.objects.annotate(
+                star_count=Count('recognitions_received__star')
+            ).filter(
+                star_count__gt=0
+            ).order_by('-star_count')[:5]
+
+            top_users = []
+            for u in top_users_qs:
+                recognitions = Recognition.objects.filter(receiver=u, status=RecognitionStatus.APPROVED)
+
+                user_categories = Category.objects.filter(
+                    recognitions_category__in=recognitions
+                ).distinct()
+
+                user_skills = Skills.objects.filter(
+                    recognitions__in=recognitions
+                ).distinct()
+
+                top_users.append({
+                    "username": u.username,
+                    "first_name": u.first_name,
+                    "last_name": u.last_name,
+                    "star_count": u.star_count,
+                    "categories": CategorySerializer(user_categories, many=True).data,
+                    "skills": SkillSerializer(user_skills, many=True).data,
+                })
+
             return Response({
-                "star_count": star_count,
-                "recognitions": {
-                    "pending": RecognitionListSerializer(pending, many=True).data,
-                    "approved": RecognitionListSerializer(approved, many=True).data,
-                    "rejected": RecognitionListSerializer(rejected, many=True).data,
+                "user_data":{
+                    "star_count": star_count,
+                    "recognitions": {
+                        "pending": RecognitionListSerializer(pending, many=True).data,
+                        "approved": RecognitionListSerializer(approved, many=True).data,
+                        "rejected": RecognitionListSerializer(rejected, many=True).data,
+                    },
+                    "skills": SkillSerializer(skills_qs, many=True).data,
                 },
-                "skills": SkillSerializer(skills_qs, many=True).data
+                "top_users": top_users
             })
 
         except Exception as e:
@@ -255,7 +287,7 @@ class RecognitionStatusChange(APIView):
     permission_classes = [AllowAny, ]
 
     @extend_schema(
-        request = StatusUpdateSerializer,
+        request=StatusUpdateSerializer,
         summary="Recognition Status Change API's",
         tags=["Recognition API's"]
     )
@@ -289,3 +321,35 @@ class RecognitionStatusChange(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+
+class GetuserProfile(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Get User Data",
+        tags=["Accounts API's"],
+    )
+    def get(self, request):
+        try:
+            user = request.user
+
+            stars = Star.objects.filter(
+                recognition__receiver=user
+            ).select_related('recognition__category')
+
+            category_counts = defaultdict(int)
+
+            for star in stars:
+                category_name = star.recognition.category.name
+                category_counts[category_name] += 1
+
+            return Response({
+                "user_id": user.id,
+                "name": user.get_full_name() if hasattr(user, "get_full_name") else user.username,
+                "star_summary": category_counts
+            })
+        except Exception as e:
+            return Response(
+                {"message": f"Server error: {str(e)}", "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -77,7 +77,7 @@ def delete_user(request, user_id):
     """Delete a user (admin only)"""
     try:
         user = get_object_or_404(KudosUser, id=user_id)
-        if user.is_admin:
+        if user.is_superuser:
             return Response({
                 "data": "",
                 "message": "Cannot delete admin user",
