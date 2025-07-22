@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Stack, Paper } from '@mui/material';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 
@@ -14,24 +14,23 @@ const SkillsPage: React.FC = () => {
   const [editId, setEditId] = useState<number | null>(null);
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  
 
   const handleOpen = () => {
     setFormData({ skillName: '' });
     setEditId(null);
     setOpen(true);
+    setIsDeleteConfirm(false);
   };
 
   const handleEdit = (skill: any) => {
-
     setFormData(skill);
     setEditId(skill.id);
     setOpen(true);
+    setIsDeleteConfirm(false);
   };
 
   const handleDelete = (id: number) => {
     const skillToDelete = skills.find((s) => s.id === id);
-    console.log('skillToDelete', skillToDelete);
     if (skillToDelete) {
       setFormData(skillToDelete);
       setDeleteId(id);
@@ -45,7 +44,7 @@ const SkillsPage: React.FC = () => {
     if (isDeleteConfirm && deleteId !== null) {
       setSkills(skills.filter((u) => u.id !== deleteId));
     } else if (editId !== null) {
-      setSkills(skills.map((u) => (u.id === editId ? { ...formData, id: editId , updatedTime} : u)));
+      setSkills(skills.map((u) => (u.id === editId ? { ...formData, id: editId, updatedTime } : u)));
     } else {
       setSkills([...skills, { ...formData, id: Date.now(), updatedTime }]);
     }
@@ -60,18 +59,32 @@ const SkillsPage: React.FC = () => {
   ];
 
   return (
-    <Box p={3}>
-      <Typography variant="h5">Skill List</Typography>
-      <Button variant="contained" onClick={handleOpen} sx={{ mb: 2 }}>
-        Add Skill
-      </Button>
+    <Box p={4}>
+      {/* Centered Project Name */}
+      <Box textAlign="center" mb={4}>
+        <Typography variant="h3" fontWeight={700} color="primary">
+          Kudos
+        </Typography>
+      </Box>
 
-      <DataTable
-        columns={columns}
-        rows={skills}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {/* Skills Table Section */}
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h5" fontWeight={600}>
+            Skills
+          </Typography>
+          <Button variant="contained" onClick={handleOpen}>
+            Add Skill
+          </Button>
+        </Stack>
+
+        <DataTable
+          columns={columns}
+          rows={skills}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Paper>
 
       <FormModal
         open={open}
@@ -79,7 +92,7 @@ const SkillsPage: React.FC = () => {
         formData={formData}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
-        title={ isDeleteConfirm ? 'Delete Confirmation':editId ? 'Edit Skill' : 'Add Skill'}
+        title={isDeleteConfirm ? 'Delete Confirmation' : editId ? 'Edit Skill' : 'Add Skill'}
         isDeleteConfirm={isDeleteConfirm}
       />
     </Box>
