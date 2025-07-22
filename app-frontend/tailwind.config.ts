@@ -25,7 +25,7 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: "#DD5426",
+					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
@@ -41,6 +41,7 @@ export default {
 					foreground: 'hsl(var(--muted-foreground))'
 				},
 				accent: {
+					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
 				popover: {
@@ -48,6 +49,7 @@ export default {
 					foreground: 'hsl(var(--popover-foreground))'
 				},
 				card: {
+					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				success: {
@@ -78,9 +80,9 @@ export default {
 				}
 			},
 			backgroundImage: {
-				'gradient-primary': "#DD5426",
-				'gradient-card': "#FFFFFF",
-				'gradient-hero': 'var(--gradient-hero)'
+				'gradient-primary': 'linear-gradient(135deg, hsl(246 70% 60%) 0%, hsl(172 60% 45%) 100%)',
+				'gradient-card': '#FFFFFF',
+				'gradient-hero': 'linear-gradient(135deg, hsl(246 70% 60% / 0.1) 0%, hsl(172 60% 45% / 0.1) 100%)'
 			},
 			boxShadow: {
 				'soft': 'var(--shadow-soft)',

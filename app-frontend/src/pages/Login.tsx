@@ -27,33 +27,34 @@ const Login = () => {
 
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
-    // try {
-    //   const response = await loginAPI(data);
-    //   if (response.success) {
-        // Store user data in localStorage
-        // localStorage.setItem("user", JSON.stringify(response.user));
+    try {
+      const response = await loginAPI({ email: data.email, password: data.password });
+      if (response.success) {
+        // Store user data in localStorage if provided
+        if (response.user) {
+          localStorage.setItem("user", JSON.stringify(response.user));
+        }
         toast({
           title: "Login successful!",
-          description: "Welcome back to PeerStar",
+          description: "Welcome back to Kudos",
         });
-        // Redirect to dashboard
         window.location.href = "/dashboard";
-    //   } else {
-    //     toast({
-    //       title: "Login failed",
-    //       description: response.message || "Invalid credentials",
-    //       variant: "destructive",
-    //     });
-    //   }
-    // } catch (error) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Something went wrong. Please try again.",
-    //     variant: "destructive",
-    //   });
-    // } finally {
-    //   setIsLoading(false);
-    // }
+      } else {
+        toast({
+          title: "Login failed",
+          description: response.message || "Invalid credentials",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

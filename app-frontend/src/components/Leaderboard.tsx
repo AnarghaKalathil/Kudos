@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Star } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter ,DialogOverlay} from "@/components/ui/dialog";
+import { changeRecognitionStatusAPI } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 // Recognition interface
 interface Recognition {
@@ -70,9 +72,9 @@ const initialRecognitions: Recognition[] = [
 ];
 
 const categoryColors: Record<string, string> = {
-  Frontend: "bg-blue-100 text-blue-800",
-  Backend: "bg-green-100 text-green-800",
-  DevOps: "bg-yellow-100 text-yellow-800"
+  Frontend: "bg-primary/10 text-primary",
+  Backend: "bg-accent/10 text-accent",
+  DevOps: "bg-info/10 text-info"
 };
 
 type ActionType = "accept" | "reject" | "moveToAccepted" | null;
@@ -86,7 +88,19 @@ export default function RecognitionTabs() {
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
   const [actionType, setActionType] = useState<ActionType>(null);
 
-  const handleStatusChange = (id: string, newStatus: Recognition["status"]) => {
+  const { toast } = useToast();
+
+  const handleStatusChange = async (id: string, newStatus: Recognition["status"]) => {
+    // Call backend API
+    const response = await changeRecognitionStatusAPI(Number(id), newStatus.toUpperCase());
+    if (!response.success) {
+      toast({
+        title: "Error",
+        description: response.message || "Failed to update status",
+        variant: "destructive"
+      });
+      return;
+    }
     setRecognitions((prev) =>
       prev.map((rec) => (rec.id === id ? { ...rec, status: newStatus } : rec))
     );
@@ -111,11 +125,11 @@ export default function RecognitionTabs() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start bg-gray-50 p-6">
+    <div className="min-h-screen flex flex-col items-center justify-start bg-gray-50 p-6 mt-8">
       <Card className="w-full flex-1 flex flex-col">
         <div className="p-4 border-b flex items-center gap-2">
           <MessageCircle className="w-5 h-5 text-muted-foreground" />
-          <h2 className="text-lg font-semibold">Recent Recognition</h2>
+          <h2 className="text-lg font-semibold">Review Requests</h2>
         </div>
 
         <Tabs

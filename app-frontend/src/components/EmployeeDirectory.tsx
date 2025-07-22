@@ -131,140 +131,121 @@ const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
 
   return (
-    <div className="space-y-6 min-h-screen flex flex-col">
-      <div className="flex flex-col gap-4">
+    <div className="space-y-10 min-h-screen flex flex-col">
+      <div className="flex flex-col gap-6 mb-2 mt-10">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Employee Directory</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">Find and recognize your teammates</p>
+          <h2 className="text-3xl font-extrabold text-foreground mb-1">Employee Directory</h2>
+          <p className="text-lg text-muted-foreground">Find and recognize your teammates</p>
         </div>
-        
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               placeholder="Search by name, role, or skills..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-12 py-3 rounded-lg shadow bg-background/80 text-base"
             />
           </div>
-{/*           
-          <select
-            value={selectedDepartment}
-            onChange={(e) => setSelectedDepartment(e.target.value)}
-            className="px-3 py-2 border rounded-md bg-card text-foreground text-sm sm:text-base min-w-0 sm:min-w-[160px]"
-          >
-          </select> */}
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
         {currentEmployees.map((employee) => (
-          <div className="flex-grow">
-          <Card key={employee.id} className=" shadow-medium hover:shadow-large transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <Avatar className="w-12 h-12">
-                  <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                    {employee.initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <CardTitle className="text-lg">{employee.name}</CardTitle>
-                  <CardDescription className="text-sm">{employee.role}</CardDescription>
+          <div className="flex flex-col h-full">
+            <Card key={employee.id} className="flex flex-col flex-1 shadow-2xl bg-white/80 backdrop-blur rounded-2xl hover:scale-[1.02] transition-transform h-full min-h-[240px]">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-4">
+                  <Avatar className="w-14 h-14 border-2 border-primary/30 shadow">
+                    <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xl">
+                      {employee.initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
+                    <CardDescription className="text-base">{employee.role}</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-star" />
+                    <span className="font-bold text-star text-lg">{employee.stars}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-star" />
-                  <span className="font-semibold text-star">{employee.stars}</span>
+              </CardHeader>
+              <CardContent className="space-y-4 flex-1 flex flex-col justify-end">
+                <div className="flex flex-wrap gap-2">
+                  {employee.skills.slice(0, 3).map((skill, index) => (
+                    <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-sm font-medium">
+                      {skill}
+                    </Badge>
+                  ))}
+                  {employee.skills.length > 3 && (
+                    <Badge variant="outline" className="rounded-full px-3 py-1 text-sm font-medium">
+                      +{employee.skills.length - 3} more
+                    </Badge>
+                  )}
                 </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-3">
-              
-              <div className="flex flex-wrap gap-1">
-                {employee.skills.slice(0, 3).map((skill, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {skill}
-                  </Badge>
-                ))}
-                {employee.skills.length > 3 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{employee.skills.length - 3} more
-                  </Badge>
-                )}
-              </div>
-              
-              <div className="flex gap-2 pt-2">
-                <Button size="sm" className="flex-1 text-xs sm:text-sm" onClick={() => onGiveStar(employee)}>
-                  <Star className="w-3 h-3 mr-1" />
-                  <span className="hidden sm:inline">Recognize </span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="flex gap-3 pt-2">
+                  <Button size="sm" className="flex-1 text-base font-semibold rounded-lg bg-gradient-to-r from-primary to-accent text-white shadow hover:scale-105 transition-transform" onClick={() => onGiveStar(employee)}>
+                    <Star className="w-4 h-4 mr-1" /> Recognize
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         ))}
       </div>
       {totalPages > 1 && (
-  <div className="flex justify-center items-center gap-1 mt-4">
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() => setCurrentPage(currentPage - 1)}
-      disabled={currentPage === 1}
-    >
-      Prev
-    </Button>
-
-    {Array.from({ length: totalPages }).map((_, i) => {
-      const page = i + 1;
-      const isVisible = 
-        page === 1 ||
-        page === totalPages ||
-        (page >= currentPage - 1 && page <= currentPage + 1);
-
-      const isEllipsis =
-        (page === currentPage - 2 && page > 2) ||
-        (page === currentPage + 2 && page < totalPages - 1);
-
-      if (isEllipsis) {
-        return <span key={page} className="px-2 text-muted-foreground">...</span>;
-      }
-
-      if (!isVisible) return null;
-
-      return (
-        <Button
-          key={page}
-          variant={currentPage === page ? "default" : "outline"}
-          size="sm"
-          onClick={() => paginate(page)}
-          className="px-3"
-        >
-          {page}
-        </Button>
-      );
-    })}
-
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() => setCurrentPage(currentPage + 1)}
-      disabled={currentPage === totalPages}
-    >
-      Next
-    </Button>
-  </div>
-)}
-
-      
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="rounded-lg px-4 py-2"
+          >
+            Prev
+          </Button>
+          {Array.from({ length: totalPages }).map((_, i) => {
+            const page = i + 1;
+            const isVisible = 
+              page === 1 ||
+              page === totalPages ||
+              (page >= currentPage - 1 && page <= currentPage + 1);
+            const isEllipsis =
+              (page === currentPage - 2 && page > 2) ||
+              (page === currentPage + 2 && page < totalPages - 1);
+            if (isEllipsis) {
+              return <span key={page} className="px-2 text-muted-foreground">...</span>;
+            }
+            if (!isVisible) return null;
+            return (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => paginate(page)}
+                className={`rounded-lg px-4 py-2 ${currentPage === page ? 'bg-primary text-white' : ''}`}
+              >
+                {page}
+              </Button>
+            );
+          })}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="rounded-lg px-4 py-2"
+          >
+            Next
+          </Button>
+        </div>
+      )}
       {filteredEmployees.length === 0 && (
-        <Card className="text-center py-8">
+        <Card className="text-center py-12 bg-white/80 rounded-2xl shadow-xl">
           <CardContent>
             <div className="text-muted-foreground">
-              <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No employees found matching your search criteria.</p>
+              <Search className="w-16 h-16 mx-auto mb-6 opacity-50" />
+              <p className="text-lg font-semibold">No employees found matching your search criteria.</p>
             </div>
           </CardContent>
         </Card>

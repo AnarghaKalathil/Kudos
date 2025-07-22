@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { giveRecognitionAPI } from "@/lib/api";
 
 interface Employee {
   id: string;
@@ -83,10 +84,9 @@ useEffect(() => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedEmployees || !category || !message || reviewer || tags.length === 0) {
+    if (!selectedEmployees || !category || !message || !reviewer || tags.length === 0) {
       toast({
         title: "Please fill in all fields",
         description: "All fields are required to submit recognition.",
@@ -94,63 +94,78 @@ useEffect(() => {
       });
       return;
     }
-
-    const employee = mockEmployees.find(emp => emp.id === selectedEmployees);
-    
-    toast({
-      title: "Recognition sent for review!",
-      description: `Your recognition for ${employee?.name} has been sent to ${reviewer || "the manager"} for approval.`,
-    });
-
-    // Reset form
-    setSelectedEmployees("");
-    setCategory("");
-    setMessage("");
-    setTags([]);
-    setNewTag("");
-    setReviewer("");
+    try {
+      const response = await giveRecognitionAPI({
+        toUserId: selectedEmployees,
+        stars: 1, // or allow user to select stars if needed
+        comment: message,
+        tags,
+        category,
+        reviewerId: reviewer,
+      });
+      if (response.success) {
+        toast({
+          title: "Recognition sent for review!",
+          description: response.message,
+        });
+        setSelectedEmployees("");
+        setCategory("");
+        setMessage("");
+        setTags([]);
+        setNewTag("");
+        setReviewer("");
+      } else {
+        toast({
+          title: "Error",
+          description: response.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const selectedEmployeeData = mockEmployees.find(emp => emp.id === selectedEmployees);
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
-      <div className="text-center">
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Give Recognition</h2>
-        <p className="text-sm sm:text-base text-muted-foreground">Recognize a teammate's contribution and expertise</p>
+    <div className="max-w-2xl mx-auto space-y-8 px-4 sm:px-0 mt-10">
+      <div className="text-center mb-2">
+        <h2 className="text-3xl font-extrabold text-foreground mb-1">Give Recognition</h2>
+        <p className="text-lg text-muted-foreground">Recognize a teammate's contribution and expertise</p>
       </div>
 
-      <Card className=" shadow-medium">
+      <Card className="shadow-2xl bg-white/80 backdrop-blur rounded-2xl">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Star className="w-5 h-5 text-star" />
-            Recognition Details
+          <CardTitle className="flex items-center gap-3 text-xl font-bold">
+            <Star className="w-6 h-6 text-star" /> Recognition Details
           </CardTitle>
-          <CardDescription>
-            Select a teammate and describe how they helped you
-          </CardDescription>
+          <CardDescription className="text-base">Select a teammate and describe how they helped you</CardDescription>
         </CardHeader>
-        
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
             {/* Employee Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Who are you recognizing?</label>
+              <label className="text-base font-semibold text-foreground">Who are you recognizing?</label>
               <Select value={selectedEmployees} onValueChange={setSelectedEmployees}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-lg shadow bg-background/80">
                   <SelectValue placeholder="Select a teammate" />
                 </SelectTrigger>
                 <SelectContent>
                   {mockEmployees.map(employee => (
                     <SelectItem key={employee.id} value={employee.id}>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
+                          <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
                             {employee.initials}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">{employee.name}</div>
+                          <div className="font-semibold">{employee.name}</div>
                           <div className="text-xs text-muted-foreground">{employee.role}</div>
                         </div>
                       </div>
@@ -158,16 +173,15 @@ useEffect(() => {
                   ))}
                 </SelectContent>
               </Select>
-              
               {selectedEmployeeData && (
-                <div className="flex items-center gap-2 p-3 bg-secondary rounded-lg">
-                  <Avatar>
-                    <AvatarFallback className="bg-primary text-primary-foreground">
+                <div className="flex items-center gap-3 p-3 bg-secondary/40 rounded-xl mt-2 shadow-inner">
+                  <Avatar className="w-8 h-8 border-2 border-primary/30">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
                       {selectedEmployeeData.initials}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium">{selectedEmployeeData.name}</div>
+                    <div className="font-semibold">{selectedEmployeeData.name}</div>
                     <div className="text-sm text-muted-foreground">{selectedEmployeeData.role}</div>
                   </div>
                 </div>
@@ -176,9 +190,9 @@ useEffect(() => {
 
             {/* Category Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Category</label>
+              <label className="text-base font-semibold text-foreground">Category</label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-lg shadow bg-background/80">
                   <SelectValue placeholder="Select recognition category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -189,9 +203,9 @@ useEffect(() => {
               </Select>
             </div>
 
-              {/* Tags */}
+            {/* Tags */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Skills & Tags</label>
+              <label className="text-base font-semibold text-foreground">Skills & Tags</label>
               <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   placeholder="Add a tag (e.g., React, API Design)"
@@ -203,23 +217,21 @@ useEffect(() => {
                       handleAddTag(newTag);
                     }
                   }}
-                  className="flex-1"
+                  className="flex-1 rounded-lg shadow bg-background/80"
                 />
-                <Button type="button" variant="outline" onClick={() => handleAddTag(newTag)} className="sm:w-auto">
-                  <Tag className="w-4 h-4 mr-1" />
-                  Add
+                <Button type="button" variant="outline" onClick={() => handleAddTag(newTag)} className="sm:w-auto rounded-lg">
+                  <Tag className="w-4 h-4 mr-1" /> Add
                 </Button>
               </div>
-              
               {/* Suggested Tags */}
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">Popular tags:</p>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-2">
                   {suggestedTags.slice(0, 8).map(tag => (
                     <Badge
                       key={tag}
                       variant="outline"
-                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                      className="cursor-pointer rounded-full px-3 py-1 hover:bg-primary hover:text-primary-foreground transition"
                       onClick={() => handleAddTag(tag)}
                     >
                       {tag}
@@ -227,17 +239,16 @@ useEffect(() => {
                   ))}
                 </div>
               </div>
-              
               {/* Selected Tags */}
               {tags.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground">Selected tags:</p>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-2">
                     {tags.map(tag => (
                       <Badge
                         key={tag}
                         variant="secondary"
-                        className="cursor-pointer"
+                        className="cursor-pointer rounded-full px-3 py-1"
                         onClick={() => handleRemoveTag(tag)}
                       >
                         {tag} ×
@@ -250,33 +261,34 @@ useEffect(() => {
 
             {/* Message */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Recognition Message</label>
+              <label className="text-base font-semibold text-foreground">Recognition Message</label>
               <Textarea
                 placeholder="Describe how this person helped you and what you learned from them..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
+                className="rounded-lg shadow bg-background/80"
               />
             </div>
 
             {/* Reviewer Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Send to Reviewer</label>
+              <label className="text-base font-semibold text-foreground">Send to Reviewer</label>
               <Select value={reviewer} onValueChange={setReviewer}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-lg shadow bg-background/80">
                   <SelectValue placeholder="Select reviewer" />
                 </SelectTrigger>
-                         <SelectContent>
+                <SelectContent>
                   {mockEmployees.map(employee => (
                     <SelectItem key={employee.id} value={employee.id}>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
+                          <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
                             {employee.initials}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">{employee.name}</div>
+                          <div className="font-semibold">{employee.name}</div>
                           <div className="text-xs text-muted-foreground">{employee.role}</div>
                         </div>
                       </div>
@@ -286,14 +298,12 @@ useEffect(() => {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full bg-primary hover:opacity-90">
-              <Send className="w-4 h-4 mr-2" />
-              Send Recognition for Review
+            <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent text-white py-3 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 transition-transform">
+              <Send className="w-5 h-5 mr-2" /> Send Recognition for Review
             </Button>
           </form>
         </CardContent>
       </Card>
-
     </div>
   );
 };

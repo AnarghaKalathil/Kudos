@@ -67,14 +67,14 @@ const mockRecognitions: Recognition[] = [
 ];
 
 const categoryColors = {
-  "Technical Excellence": "bg-blue-100 text-blue-800",
-  "Mentoring": "bg-green-100 text-green-800",
-  "Problem Solving": "bg-purple-100 text-purple-800",
-  "Collaboration": "bg-orange-100 text-orange-800",
-  "Innovation": "bg-pink-100 text-pink-800",
-  "Leadership": "bg-yellow-100 text-yellow-800",
-  "Support": "bg-indigo-100 text-indigo-800",
-  "Knowledge Sharing": "bg-red-100 text-red-800"
+  "Technical Excellence": "bg-primary/10 text-primary",
+  "Mentoring": "bg-accent/10 text-accent",
+  "Problem Solving": "bg-info/10 text-info",
+  "Collaboration": "bg-secondary/20 text-secondary-foreground",
+  "Innovation": "bg-warning/10 text-warning",
+  "Leadership": "bg-success/10 text-success",
+  "Support": "bg-muted/10 text-muted-foreground",
+  "Knowledge Sharing": "bg-destructive/10 text-destructive"
 };
 
 export const UserProfile = () => {
@@ -104,156 +104,146 @@ export const UserProfile = () => {
   const nextLevelProgress = (totalStars % 10) * 10;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
+    <div className="max-w-4xl mx-auto space-y-10 px-4 sm:px-0 mt-10">
       {/* Profile Header */}
-      <Card className=" shadow-medium">
-        <CardContent className="pt-4 sm:pt-6">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-            <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
-              <AvatarFallback className="bg-primary text-primary-foreground text-xl sm:text-2xl font-bold">
+      <Card className="shadow-2xl bg-white/80 backdrop-blur rounded-2xl">
+        <CardContent className="pt-8 pb-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
+            <Avatar className="w-24 h-24 border-4 border-primary/30 shadow-lg">
+              <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-extrabold">
                 JD
               </AvatarFallback>
             </Avatar>
-            
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">John Doe</h1>
-              <p className="text-base sm:text-lg text-muted-foreground">Senior Full Stack Developer</p>
-              <p className="text-sm text-muted-foreground">Engineering • john.doe@company.com</p>
-              
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-4">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-1">John Doe</h1>
+              <p className="text-lg sm:text-xl text-muted-foreground font-medium">Senior Full Stack Developer</p>
+              <p className="text-base text-muted-foreground mb-2">Engineering • john.doe@company.com</p>
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 mt-4">
                 <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-star" />
-                  <span className="text-xl sm:text-2xl font-bold text-star">{totalStars}</span>
-                  <span className="text-sm text-muted-foreground">stars earned</span>
+                  <Star className="w-6 h-6 text-star" />
+                  <span className="text-2xl sm:text-3xl font-extrabold text-star">{totalStars}</span>
+                  <span className="text-base text-muted-foreground">stars earned</span>
                 </div>
-                
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
+                  <Trophy className="w-6 h-6 text-warning" />
                 </div>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
-
       {/* Profile Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="recognitions">Recognitions</TabsTrigger>
-          <TabsTrigger value="skills">Skills</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 rounded-xl bg-muted/40 mb-6">
+          <TabsTrigger value="overview" className="rounded-xl text-lg font-semibold data-[state=active]:bg-primary/10 data-[state=active]:text-primary">Overview</TabsTrigger>
+          <TabsTrigger value="recognitions" className="rounded-xl text-lg font-semibold data-[state=active]:bg-primary/10 data-[state=active]:text-primary">Recognitions</TabsTrigger>
+          <TabsTrigger value="skills" className="rounded-xl text-lg font-semibold data-[state=active]:bg-primary/10 data-[state=active]:text-primary">Skills</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="overview" className="space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Category Breakdown */}
-            <Card className="shadow-medium">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="w-5 h-5" />
-                  Recognition Categories
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Object.entries(categoryBreakdown).map(([category, count]) => (
-                    <div key={category} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{category}</span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {count} star{count !== 1 ? 's' : ''}
-                        </Badge>
+            <div className="flex flex-col h-full">
+              <Card className="flex flex-col flex-1 shadow-xl bg-white/80 rounded-2xl h-full min-h-[320px]">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-xl font-bold">
+                    <Award className="w-6 h-6" /> Recognition Categories
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(categoryBreakdown).map(([category, count]) => (
+                      <div key={category} className="flex items-center justify-between">
+                        <span className="text-base font-semibold">{category}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="rounded-full px-3 py-1 text-base font-semibold">
+                            {count} star{count !== 1 ? 's' : ''}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
             {/* Recent Activity */}
-            <Card className="shadow-medium">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Recent Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {approvedRecognitions.slice(0, 3).map((recognition) => (
-                    <div key={recognition.id} className="flex items-center gap-3">
-                      <Star className="w-4 h-4 text-star" />
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <span className="font-medium">{recognition.from}</span> recognized you
-                        </p>
-                        <p className="text-xs text-muted-foreground">{recognition.date}</p>
+            <div className="flex flex-col h-full">
+              <Card className="flex flex-col flex-1 shadow-xl bg-white/80 rounded-2xl h-full min-h-[320px]">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-xl font-bold">
+                    <TrendingUp className="w-6 h-6" /> Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {approvedRecognitions.slice(0, 3).map((recognition) => (
+                      <div key={recognition.id} className="flex items-center gap-4">
+                        <Star className="w-5 h-5 text-star" />
+                        <div className="flex-1">
+                          <p className="text-base font-semibold">
+                            <span className="font-bold">{recognition.from}</span> recognized you
+                          </p>
+                          <p className="text-xs text-muted-foreground">{recognition.date}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-
-         
         </TabsContent>
-
-        <TabsContent value="recognitions" className="space-y-4">
-          <div className="space-y-4">
+        <TabsContent value="recognitions" className="space-y-6">
+          <div className="space-y-6">
             {approvedRecognitions.map((recognition) => (
-              <Card key={recognition.id} className="shadow-medium">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-3">
-                    <Avatar>
-                      <AvatarFallback className="bg-primary text-primary-foreground">
+              <Card key={recognition.id} className="shadow-xl bg-white/80 rounded-2xl">
+                <CardContent className="pt-8 pb-6">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="w-10 h-10 border-2 border-primary/30">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
                         {recognition.fromInitials}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium">{recognition.from}</span>
+                        <span className="font-semibold">{recognition.from}</span>
                         <Badge 
                           variant="secondary" 
-                          className={`text-xs ${categoryColors[recognition.category as keyof typeof categoryColors] || 'bg-gray-100 text-gray-800'}`}
+                          className={`rounded-full px-3 py-1 text-base font-semibold ${categoryColors[recognition.category as keyof typeof categoryColors] || 'bg-gray-100 text-gray-800'}`}
                         >
                           {recognition.category}
                         </Badge>
                         <span className="text-xs text-muted-foreground">{recognition.date}</span>
                       </div>
-                      <p className="text-sm mb-3">{recognition.message}</p>
-                      <div className="flex gap-1">
+                      <p className="text-base mb-3">{recognition.message}</p>
+                      <div className="flex gap-2">
                         {recognition.tags.map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-sm font-medium">
                             {tag}
                           </Badge>
                         ))}
                       </div>
                     </div>
-                    <Star className="w-5 h-5 text-star" />
+                    <Star className="w-6 h-6 text-star" />
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         </TabsContent>
-
-        <TabsContent value="skills" className="space-y-4">
-          <Card className="shadow-medium">
+        <TabsContent value="skills" className="space-y-6">
+          <Card className="shadow-xl bg-white/80 rounded-2xl">
             <CardHeader>
-              <CardTitle>Top Skills</CardTitle>
-              <CardDescription>
-                Skills you've been recognized for the most
-              </CardDescription>
+              <CardTitle className="text-xl font-bold">Top Skills</CardTitle>
+              <CardDescription className="text-base">Skills you've been recognized for the most</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {topSkills.map(([skill, count]) => (
                   <div key={skill} className="flex items-center justify-between">
-                    <span className="font-medium">{skill}</span>
+                    <span className="font-semibold text-base">{skill}</span>
                     <div className="flex items-center gap-2">
-                      <Progress value={(count / Math.max(...Object.values(skillFrequency))) * 100} className="w-20 h-2" />
-                      <span className="text-sm text-muted-foreground">{count}</span>
+                      <Progress value={(count / Math.max(...Object.values(skillFrequency))) * 100} className="w-32 h-2 rounded-full" />
+                      <span className="text-base text-muted-foreground">{count}</span>
                     </div>
                   </div>
                 ))}
@@ -261,7 +251,6 @@ export const UserProfile = () => {
             </CardContent>
           </Card>
         </TabsContent>
-
       </Tabs>
     </div>
   );
