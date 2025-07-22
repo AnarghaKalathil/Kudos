@@ -10,7 +10,6 @@ import { loginAPI } from "@/lib/api";
 
 interface LoginForm {
   email: string;
-  username: string;
   password: string;
 }
 
@@ -22,7 +21,6 @@ const Login = () => {
   const form = useForm<LoginForm>({
     defaultValues: {
       email: "",
-      username: "",
       password: "",
     },
   });
@@ -59,24 +57,24 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex items-center justify-center p-4">
+    <div className="min-h-screen  flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Logo and Title */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2 ">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="p-3 bg-gradient-to-r from-primary to-secondary rounded-full">
               <Star className="h-6 w-6 text-primary-foreground" fill="currentColor" />
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              PeerStar
+              Kudos
             </h1>
           </div>
           <p className="text-muted-foreground">Sign in to your account</p>
         </div>
 
         {/* Login Form */}
-        <Card className="shadow-lg border-0 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="space-y-1 pb-4">
+        <Card className="shadow-xl border-0 bg-white backdrop-blur-sm">
+          <CardHeader className="space-y-2 pb-4">
             <CardTitle className="text-xl text-center">Welcome back</CardTitle>
             <CardDescription className="text-center">
               Enter your credentials to access your account
@@ -103,31 +101,6 @@ const Login = () => {
                           {...field}
                           type="email"
                           placeholder="Enter your email"
-                          className="h-11"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="username"
-                  rules={{
-                    required: "Username is required",
-                    minLength: {
-                      value: 3,
-                      message: "Username must be at least 3 characters",
-                    },
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter your username"
                           className="h-11"
                         />
                       </FormControl>

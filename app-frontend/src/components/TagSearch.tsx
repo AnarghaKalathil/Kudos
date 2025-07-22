@@ -29,6 +29,7 @@ interface TagSearchProps {
 }
 
 const mockEmployees: Employee[] = [
+
   {
     id: "1",
     name: "Alice Chen",
@@ -149,7 +150,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
         <p className="text-sm sm:text-base text-muted-foreground">Search for teammates by skills and expertise</p>
       </div>
 
-      <Card className="bg-gradient-card shadow-medium">
+      <Card className="shadow-medium">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="w-5 h-5" />
@@ -219,7 +220,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {filteredEmployees.map((employee) => (
-          <Card key={employee.id} className="bg-gradient-card shadow-medium hover:shadow-large transition-shadow">
+          <Card key={employee.id} className=" shadow-medium hover:shadow-large transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
                 <Avatar className="w-12 h-12">
@@ -238,11 +239,6 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  {employee.department}
-                </Badge>
-              </div>
               <div className="flex gap-60 pt-2">
                 <Button
                   size="sm"
@@ -255,7 +251,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-xs sm:text-sm"
+                  className="text-xs sm:text-sm hover:text-black"
                   onClick={() => onGiveStar(employee)}
                 >
                   <Star className="w-3 h-3 mr-1" />
@@ -270,7 +266,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
       {viewingEmployee && (
 <Dialog open={!!viewingEmployee} onOpenChange={() => setViewingEmployee(null)}>
   <DialogContent className="max-w-3xl"> {/* WIDER MODAL */}
-    <Card className="bg-gradient-card shadow-medium w-full">
+    <Card className=" shadow-medium w-full">
       <CardContent className="pt-4 sm:pt-6">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
           {/* Avatar */}

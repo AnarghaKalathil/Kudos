@@ -48,12 +48,6 @@ const suggestedTags = [
   "Figma", "Design Systems", "User Research", "Prototyping"
 ];
 
-const reviewerOptions = [
-  { id: "manager", label: "Direct Manager" },
-  { id: "hr", label: "HR Team" },
-  { id: "tech-lead", label: "Tech Lead" },
-  { id: "team-lead", label: "Team Lead" },
-];
 
 interface GiveRecognitionProps {
   selectedEmployee: { id: string; name: string } | null;
@@ -126,7 +120,7 @@ useEffect(() => {
         <p className="text-sm sm:text-base text-muted-foreground">Recognize a teammate's contribution and expertise</p>
       </div>
 
-      <Card className="bg-gradient-card shadow-medium">
+      <Card className=" shadow-medium">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Star className="w-5 h-5 text-star" />
@@ -292,7 +286,7 @@ useEffect(() => {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full bg-gradient-primary hover:opacity-90">
+            <Button type="submit" className="w-full bg-primary hover:opacity-90">
               <Send className="w-4 h-4 mr-2" />
               Send Recognition for Review
             </Button>

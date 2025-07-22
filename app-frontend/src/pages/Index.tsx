@@ -24,18 +24,18 @@ const Index = () => {
 
   return (
     
-    <div className="h-full bg-gradient-hero min-h-full">
+    <div className="h-full  min-h-full">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white ">
       <header className="bg-card shadow-soft border-b">
         <div className="container mx-auto px-4 py-3 sm:py-4 ">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 sm:w-10 sm:h-10  bg-primary rounded-lg flex items-center justify-center">
                 <Star className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-foreground">PeerStar</h1>
+                <h1 className="text-lg sm:text-2xl font-bold text-foreground">Kudos</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Recognition & Knowledge Platform</p>
               </div>
             </div>
@@ -92,17 +92,17 @@ const Index = () => {
             </TabsList>
 
             <TabsContent value="overview" className="py-4 sm:py-6">
-              <div className="bg-gradient-primary rounded-xl p-6 mb-16 text-white">
-                <h2 className="text-2xl font-bold mb-2">Welcome back, John! ✨</h2>
-                <p className="text-white/90 mb-4">
+              <div className=" bg-white border shadow-large bg- rounded-xl p-6 mb-16 text-white">
+                <h2 className="text-2xl font-bold mb-2 text-black">Welcome back, John! ✨</h2>
+                <p className="text-black mb-4 ">
                   Ready to spread some appreciation? You have 3 pending recognition requests to review.
                 </p>
-                <Button className="bg-white text-primary hover:bg-white/90" onClick={() => setActiveTab("review")}>
+                <Button className="bg-primary text-white " onClick={() => setActiveTab("review")}>
                   Review Requests
                 </Button>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                <Card className="bg-gradient-card shadow-medium">
+                <Card className=" shadow-large">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Star className="w-5 h-5 text-star" />
@@ -114,7 +114,7 @@ const Index = () => {
                   </CardHeader>
                   <CardContent>
                     <Button 
-                      className="w-full bg-gradient-primary hover:opacity-90 transition-opacity"
+                      className="w-full  bg-primary hover:opacity-90 transition-opacity"
                       onClick={() => setActiveTab("give")}
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -123,7 +123,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-card shadow-medium">
+                <Card className=" shadow-large">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Search className="w-5 h-5 text-info" />
@@ -136,7 +136,7 @@ const Index = () => {
                   <CardContent>
                     <Button 
                       variant="outline" 
-                      className="w-full"
+                      className="w-full hover:text-balck"
                       onClick={() => setActiveTab("search")}
                     >
                       <Search className="w-4 h-4 mr-2" />
@@ -145,7 +145,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-card shadow-medium">
+                <Card className=" shadow-large">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Trophy className="w-5 h-5 text-warning" />
@@ -156,9 +156,9 @@ const Index = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button 
+                    <Button  
                       variant="outline" 
-                      className="w-full"
+                      className="w-full hover:text-balck"
                       onClick={() => setActiveTab("directory")}
                     >
                       <Trophy className="w-4 h-4 mr-2" />
@@ -170,28 +170,28 @@ const Index = () => {
 
               {/* Stats Overview */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <Card className="text-center">
+                <Card className="text-center shadow-large">
                   <CardContent className="pt-4 sm:pt-6">
-                    <div className="text-2xl sm:text-3xl font-bold text-primary mb-1 sm:mb-2">247</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-primary mb-1 sm:mb-2 ">247</div>
                     <div className="text-xs sm:text-sm text-muted-foreground">Total Stars</div>
                   </CardContent>
                 </Card>
-                <Card className="text-center">
+                <Card className="text-center shadow-large">
                   <CardContent className="pt-4 sm:pt-6">
                     <div className="text-2xl sm:text-3xl font-bold text-accent mb-1 sm:mb-2">89</div>
                     <div className="text-xs sm:text-sm text-muted-foreground">Contributors</div>
                   </CardContent>
                 </Card>
-                <Card className="text-center">
+                <Card className="text-center shadow-large">
                   <CardContent className="pt-4 sm:pt-6">
-                    <div className="text-2xl sm:text-3xl font-bold text-info mb-1 sm:mb-2">156</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-info mb-1 sm:mb-2">16</div>
                     <div className="text-xs sm:text-sm text-muted-foreground">Skills</div>
                   </CardContent>
                 </Card>
-                <Card className="text-center">
+                <Card className="text-center shadow-large">
                   <CardContent className="pt-4 sm:pt-6">
                     <div className="text-2xl sm:text-3xl font-bold text-warning mb-1 sm:mb-2">23</div>
-                    <div className="text-xs sm:text-sm text-muted-foreground">Experts</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Users</div>
                   </CardContent>
                 </Card>
               </div>

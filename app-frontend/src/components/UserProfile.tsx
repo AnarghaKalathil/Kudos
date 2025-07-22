@@ -106,7 +106,7 @@ export const UserProfile = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
       {/* Profile Header */}
-      <Card className="bg-gradient-card shadow-medium">
+      <Card className=" shadow-medium">
         <CardContent className="pt-4 sm:pt-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
             <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
@@ -196,47 +196,7 @@ export const UserProfile = () => {
             </Card>
           </div>
 
-          {/* Pending Recognitions */}
-          {pendingRecognitions.length > 0 && (
-            <Card className="shadow-medium">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5" />
-                  Pending Recognitions
-                </CardTitle>
-                <CardDescription>
-                  These recognitions are waiting for review
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {pendingRecognitions.map((recognition) => (
-                    <div key={recognition.id} className="p-3 bg-secondary rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                            {recognition.fromInitials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <span className="font-medium">{recognition.from}</span>
-                          <Badge variant="outline" className="ml-2 text-xs">Pending</Badge>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">{recognition.message}</p>
-                      <div className="flex gap-1">
-                        {recognition.tags.map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+         
         </TabsContent>
 
         <TabsContent value="recognitions" className="space-y-4">

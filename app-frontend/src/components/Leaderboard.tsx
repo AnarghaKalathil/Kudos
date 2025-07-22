@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Star } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter ,DialogOverlay} from "@/components/ui/dialog";
 
 // Recognition interface
 interface Recognition {
@@ -15,13 +16,12 @@ interface Recognition {
   to: string;
   skill: string;
   category: string;
-  timeAgo: string;
+  date: string;
   message: string;
   tags: string[];
   status: "pending" | "accepted" | "rejected";
 }
 
-// Dummy recognitions
 const initialRecognitions: Recognition[] = [
   {
     id: "r1",
@@ -29,7 +29,7 @@ const initialRecognitions: Recognition[] = [
     to: "Bob Smith",
     skill: "React Debug",
     category: "Frontend",
-    timeAgo: "2 hours ago",
+    date: "2 hours ago",
     message: "Great work tracking down that nasty bug!",
     tags: ["JS", "Bug Fix", "Hooks"],
     status: "pending"
@@ -40,7 +40,7 @@ const initialRecognitions: Recognition[] = [
     to: "Diana Lee",
     skill: "API Design",
     category: "Backend",
-    timeAgo: "4 hours ago",
+    date: "4 hours ago",
     message: "Loved your clean API structure!",
     tags: ["REST", "Design", "Docs"],
     status: "pending"
@@ -51,7 +51,7 @@ const initialRecognitions: Recognition[] = [
     to: "Frank Davis",
     skill: "Docker Setup",
     category: "DevOps",
-    timeAgo: "1 day ago",
+    date: "1 day ago",
     message: "Setup worked flawlessly across environments!",
     tags: ["Docker", "CI/CD"],
     status: "accepted"
@@ -62,7 +62,7 @@ const initialRecognitions: Recognition[] = [
     to: "Sarah Green",
     skill: "Tailwind Mastery",
     category: "Frontend",
-    timeAgo: "3 days ago",
+    date: "3 days ago",
     message: "Loved the clean responsive UI you built.",
     tags: ["Tailwind", "CSS", "Design"],
     status: "rejected"
@@ -75,16 +75,39 @@ const categoryColors: Record<string, string> = {
   DevOps: "bg-yellow-100 text-yellow-800"
 };
 
+type ActionType = "accept" | "reject" | "moveToAccepted" | null;
+
 export default function RecognitionTabs() {
   const [recognitions, setRecognitions] = useState(initialRecognitions);
   const [activeTab, setActiveTab] = useState<"pending" | "accepted" | "rejected">("pending");
 
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
+  const [actionType, setActionType] = useState<ActionType>(null);
+
   const handleStatusChange = (id: string, newStatus: Recognition["status"]) => {
     setRecognitions((prev) =>
-      prev.map((rec) =>
-        rec.id === id ? { ...rec, status: newStatus } : rec
-      )
+      prev.map((rec) => (rec.id === id ? { ...rec, status: newStatus } : rec))
     );
+  };
+
+  const openConfirmation = (recognition: Recognition, action: ActionType) => {
+    setSelectedRecognition(recognition);
+    setActionType(action);
+    setModalOpen(true);
+  };
+
+  const confirmAction = () => {
+    if (!selectedRecognition || !actionType) return;
+
+    if (actionType === "accept") handleStatusChange(selectedRecognition.id, "accepted");
+    if (actionType === "reject") handleStatusChange(selectedRecognition.id, "rejected");
+    if (actionType === "moveToAccepted") handleStatusChange(selectedRecognition.id, "accepted");
+
+    setModalOpen(false);
+    setSelectedRecognition(null);
+    setActionType(null);
   };
 
   return (
@@ -107,11 +130,7 @@ export default function RecognitionTabs() {
           </TabsList>
 
           {["pending", "accepted", "rejected"].map((status) => (
-            <TabsContent
-              key={status}
-              value={status}
-              className="p-4 flex-1 overflow-auto"
-            >
+            <TabsContent key={status} value={status} className="p-4 flex-1 overflow-auto">
               {recognitions.filter((r) => r.status === status).length === 0 ? (
                 <p className="text-muted-foreground text-sm">No {status} recognitions.</p>
               ) : (
@@ -132,14 +151,17 @@ export default function RecognitionTabs() {
                                 <span className="font-medium">{recognition.from}</span>
                                 <Badge
                                   variant="secondary"
-                                  className={`text-xs ${categoryColors[recognition.category] || 'bg-gray-100 text-gray-800'}`}
+                                  className={`text-xs ${
+                                    categoryColors[recognition.category] || "bg-gray-100 text-gray-800"
+                                  }`}
                                 >
                                   {recognition.category}
                                 </Badge>
-                                <span className="text-xs text-muted-foreground">• {recognition.timeAgo}</span>
+                                <span className="text-xs text-muted-foreground">• {recognition.date}</span>
                               </div>
                               <p className="text-sm text-muted-foreground mb-1">
-                                recognized <span className="font-medium">{recognition.to}</span> for <strong>{recognition.skill}</strong>
+                                recognized <span className="font-medium">{recognition.to}</span> for{" "}
+                                <strong>{recognition.skill}</strong>
                               </p>
                               <p className="text-sm mb-3 italic">“{recognition.message}”</p>
                               <div className="flex gap-1 flex-wrap">
@@ -158,14 +180,14 @@ export default function RecognitionTabs() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleStatusChange(recognition.id, "accepted")}
+                                onClick={() => openConfirmation(recognition, "accept")}
                               >
                                 Accept
                               </Button>
-                              <Button
+                              <Button 
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => handleStatusChange(recognition.id, "rejected")}
+                                onClick={() => openConfirmation(recognition, "reject")}
                               >
                                 Reject
                               </Button>
@@ -177,7 +199,7 @@ export default function RecognitionTabs() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleStatusChange(recognition.id, "accepted")}
+                                onClick={() => openConfirmation(recognition, "moveToAccepted")}
                               >
                                 Move to Accepted
                               </Button>
@@ -192,6 +214,32 @@ export default function RecognitionTabs() {
           ))}
         </Tabs>
       </Card>
+
+      {/* Confirmation Modal */}
+      <Dialog open={modalOpen} onOpenChange={(open) => !open && setModalOpen(false)}>
+        <DialogOverlay className="fixed inset-0 bg-black/10 z-50" />
+        <DialogContent className="max-w-md">
+          <div className="text-center space-y-3">
+            <h3 className="text-2xl font-semibold">Confirm Action</h3>
+            <p className="text-sm ">
+              Are you sure you want to{" "}
+              <strong>
+                {actionType === "accept"
+                  ? "Accept"
+                  : actionType === "reject"
+                  ? "Reject"
+                  : "Move to Accepted"}
+              </strong>{" "}
+            </p>
+          </div>
+          <DialogFooter className="pt-4">
+            <Button variant="outline" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAction}>Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
