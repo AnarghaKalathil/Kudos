@@ -12,6 +12,9 @@ const SkillsPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({ skillName: '' });
   const [editId, setEditId] = useState<number | null>(null);
+  const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  
 
   const handleOpen = () => {
     setFormData({ skillName: '' });
@@ -20,23 +23,35 @@ const SkillsPage: React.FC = () => {
   };
 
   const handleEdit = (skill: any) => {
+
     setFormData(skill);
     setEditId(skill.id);
     setOpen(true);
   };
 
   const handleDelete = (id: number) => {
-    setSkills(skills.filter((s) => s.id !== id));
+    const skillToDelete = skills.find((s) => s.id === id);
+    console.log('skillToDelete', skillToDelete);
+    if (skillToDelete) {
+      setFormData(skillToDelete);
+      setDeleteId(id);
+      setIsDeleteConfirm(true);
+      setOpen(true);
+    }
   };
 
   const handleSubmit = () => {
     const updatedTime = new Date().toISOString().split('T')[0];
-    if (editId) {
-      setSkills(skills.map((s) => (s.id === editId ? { ...formData, id: editId, updatedTime } : s)));
+    if (isDeleteConfirm && deleteId !== null) {
+      setSkills(skills.filter((u) => u.id !== deleteId));
+    } else if (editId !== null) {
+      setSkills(skills.map((u) => (u.id === editId ? { ...formData, id: editId , updatedTime} : u)));
     } else {
       setSkills([...skills, { ...formData, id: Date.now(), updatedTime }]);
     }
     setOpen(false);
+    setDeleteId(null);
+    setIsDeleteConfirm(false);
   };
 
   const columns = [
@@ -64,7 +79,8 @@ const SkillsPage: React.FC = () => {
         formData={formData}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
-        title={editId ? 'Edit Skill' : 'Add Skill'}
+        title={ isDeleteConfirm ? 'Delete Confirmation':editId ? 'Edit Skill' : 'Add Skill'}
+        isDeleteConfirm={isDeleteConfirm}
       />
     </Box>
   );

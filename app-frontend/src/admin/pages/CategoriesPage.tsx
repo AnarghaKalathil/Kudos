@@ -12,6 +12,8 @@ const CategoriesPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({ categoryName: '' });
   const [editId, setEditId] = useState<number | null>(null);
+  const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const handleOpen = () => {
     setFormData({ categoryName: '' });
@@ -26,17 +28,27 @@ const CategoriesPage: React.FC = () => {
   };
 
   const handleDelete = (id: number) => {
-    setCategories(categories.filter((c) => c.id !== id));
+    const categoryToDelete = categories.find((c) => c.id === id);
+    if (categoryToDelete) {
+      setFormData(categoryToDelete);
+      setDeleteId(id);
+      setIsDeleteConfirm(true);
+      setOpen(true);
+    }
   };
 
   const handleSubmit = () => {
     const updatedTime = new Date().toISOString().split('T')[0];
-    if (editId) {
-      setCategories(categories.map((c) => (c.id === editId ? { ...formData, id: editId, updatedTime } : c)));
+    if (isDeleteConfirm && deleteId !== null) {
+      setCategories(categories.filter((u) => u.id !== deleteId));
+    } else if (editId !== null) {
+      setCategories(categories.map((u) => (u.id === editId ? { ...formData, id: editId , updatedTime} : u)));
     } else {
       setCategories([...categories, { ...formData, id: Date.now(), updatedTime }]);
     }
     setOpen(false);
+    setDeleteId(null);
+    setIsDeleteConfirm(false);
   };
 
   const columns = [
@@ -64,7 +76,9 @@ const CategoriesPage: React.FC = () => {
         formData={formData}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
-        title={editId ? 'Edit Category' : 'Add Category'}
+        title={ isDeleteConfirm ? 'Delete Confirmation' :editId ? 'Edit Category' : 'Add Category'}
+        isDeleteConfirm={isDeleteConfirm}
+
       />
     </Box>
   );
