@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
-from .models import KudosUser
+from .models import KudosUser, DeviceToken
 from .serializers import (LoginSwaggerSerializer, LogoutSwaggerSerializer,
                           UserSerializer)
 
@@ -120,6 +120,29 @@ class LogoutView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        except Exception as e:
+            return Response(
+                {"message": f"Server error: {str(e)}", "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class SaveFCMToken(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            token = request.data.get("token")
+            device_type = request.data.get("device_type")
+
+            if token:
+                DeviceToken.objects.update_or_create(
+                    user=request.user,
+                    token=token,
+                    defaults={"device_type": device_type}
+                )
+                return Response({"message": "Token saved."})
+            return Response({"error": "Token is required"}, status=400)
         except Exception as e:
             return Response(
                 {"message": f"Server error: {str(e)}", "status": False},
