@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Button, CircularProgress, Snackbar, Alert } from '@mui/material';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
+import { Button } from '@/components/ui/button';
 import { getAllSkills, createSkill, deleteSkill } from '@/lib/adminApi';
 
 const SkillsPage: React.FC = () => {
@@ -37,15 +37,6 @@ const SkillsPage: React.FC = () => {
     setEditId(null);
     setOpen(true);
     setIsDeleteConfirm(false);
-    setIsDeleteConfirm(false);
-  };
-
-  const handleEdit = (skill: any) => {
-    setFormData({ name: skill.name });
-    setEditId(skill.id);
-    setOpen(true);
-    setIsDeleteConfirm(false);
-    setIsDeleteConfirm(false);
   };
 
   const handleDelete = (id: number) => {
@@ -79,44 +70,34 @@ const SkillsPage: React.FC = () => {
 
   const columns = [
     { key: 'name', label: 'Skill Name' },
-    { key: 'created_at', label: 'Created At' },
   ];
 
   return (
-    <Box p={3}>
-      <Typography variant="h5">Skills</Typography>
-
-      <Button variant="contained" onClick={handleOpen} sx={{ mb: 2 }}>
-        Add Skill
-      </Button>
-
-      {loading ? (
-        <CircularProgress />
-      ) : (
-        <DataTable
-          columns={columns}
-          rows={skills}
-          // onEdit={handleEdit}
-          onDelete={handleDelete}
+    <div className="w-full">
+      <div className="flex flex-row items-center justify-between py-6 px-2">
+        <h2 className="text-2xl font-bold text-foreground">Skills</h2>
+        <Button onClick={handleOpen} className="text-lg px-8 py-3 font-bold rounded-lg">Add Skill</Button>
+      </div>
+      <div className="w-full">
+        {loading ? (
+          <div className="flex justify-center items-center py-6 text-muted-foreground text-base">Loading...</div>
+        ) : (
+          <DataTable columns={columns} rows={skills} onDelete={handleDelete} />
+        )}
+        <FormModal
+          open={open}
+          handleClose={() => setOpen(false)}
+          formData={formData}
+          setFormData={setFormData}
+          handleSubmit={handleSubmit}
+          title={isDeleteConfirm ? 'Delete Confirmation' : editId ? 'Edit Skill' : 'Add Skill'}
+          isDeleteConfirm={isDeleteConfirm}
         />
-      )}
-
-      <FormModal
-        open={open}
-        handleClose={() => setOpen(false)}
-        formData={formData}
-        setFormData={setFormData}
-        handleSubmit={handleSubmit}
-        title={isDeleteConfirm ? 'Delete Confirmation' : editId ? 'Edit Skill' : 'Add Skill'}
-        isDeleteConfirm={isDeleteConfirm}
-      />
-
-      <Snackbar open={!!error} autoHideDuration={4000} onClose={() => setError(null)}>
-        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
-          {error}
-        </Alert>
-      </Snackbar>
-    </Box>
+        {error && (
+          <div className="text-red-600 text-sm text-center mt-2">{error}</div>
+        )}
+      </div>
+    </div>
   );
 };
 
