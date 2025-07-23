@@ -195,40 +195,18 @@ const Index = () => {
                   </CardContent>
                 </Card>
               </div>
-
-            </TabsContent>
-
-            <TabsContent value="directory" className="py-4 sm:py-6">
-              <EmployeeDirectory
-                onGiveStar={(employee) => {
-                  setSelectedEmployee(employee); 
-                  setIsFromGiveStar(true);
-                  setActiveTab("give");
-                }} />
-            </TabsContent>
-
-            <TabsContent value="give" className="py-4 sm:py-6">
-              <GiveRecognition selectedEmployee={selectedEmployee} isFromGiveStar={isFromGiveStar} />
-            </TabsContent>
-
-            <TabsContent value="search" className="py-4 sm:py-6">
-              <TagSearch
-                onGiveStar={(employee) => {
-                  setSelectedEmployee(employee);
-                  setIsFromGiveStar(true);
-                  setActiveTab("give");
-                }} />
-            </TabsContent>
-
-            <TabsContent value="profile" className="py-4 sm:py-6">
-              <UserProfile />
-            </TabsContent>
-
-             <TabsContent value="review" className="py-4 sm:py-6">
-              <RecognitionTabs 
-                />
-            </TabsContent>
-          </Tabs>
+            </section>
+          )}
+          {/* Directory */}
+          {activeTab === 'directory' && <EmployeeDirectory onGiveStar={(employee) => { setSelectedEmployee({ id: employee.id.toString(), name: employee.name }); setIsFromGiveStar(true); setActiveTab('give'); }} />}
+          {/* Give Star */}
+          {activeTab === 'give' && <GiveRecognition selectedEmployee={selectedEmployee} isFromGiveStar={isFromGiveStar} />}
+          {/* Tag Search */}
+          {activeTab === 'search' && <TagSearch onGiveStar={(employee) => { setSelectedEmployee({ id: employee.id.toString(), name: employee.name }); setIsFromGiveStar(true); setActiveTab('give'); }} />}
+          {/* Profile */}
+          {activeTab === 'profile' && <UserProfile />}
+          {/* Reviews */}
+          {activeTab === 'review' && <RecognitionTabs />}
         </div>
       </nav>
     </div>

@@ -79,7 +79,44 @@ export default function RecognitionTabs() {
   const [recognitions, setRecognitions] = useState(initialRecognitions);
   const [activeTab, setActiveTab] = useState<"pending" | "accepted" | "rejected">("pending");
 
-  const handleStatusChange = (id: string, newStatus: Recognition["status"]) => {
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
+  const [actionType, setActionType] = useState<ActionType>(null);
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    getAllRecognitionsAPI().then((data) => {
+      if (Array.isArray(data)) {
+        // Map backend fields to UI fields
+        const mapped = data.map((item, idx) => ({
+          id: item.id?.toString() || idx.toString(),
+          from: item.sender || '',
+          to: item.reviewer || '',
+          skill: Array.isArray(item.skills) ? item.skills.join(', ') : (item.skills || ''),
+          category: item.category || '',
+          date: item.created_at ? new Date(item.created_at).toLocaleDateString() : '',
+          message: item.message || '',
+          tags: Array.isArray(item.skills) ? item.skills : [],
+          status: (item.status || '').toLowerCase(),
+        }));
+        setRecognitions(mapped);
+      }
+    });
+  }, []);
+
+  const handleStatusChange = async (id: string, newStatus: Recognition["status"]) => {
+    // Call backend API
+    const response = await changeRecognitionStatusAPI(Number(id), newStatus.toUpperCase());
+    if (!response.success) {
+      toast({
+        title: "Error",
+        description: response.message || "Failed to update status",
+        variant: "destructive"
+      });
+      return;
+    }
     setRecognitions((prev) =>
       prev.map((rec) =>
         rec.id === id ? { ...rec, status: newStatus } : rec
