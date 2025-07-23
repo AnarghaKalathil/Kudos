@@ -10,7 +10,6 @@ import { loginAPI } from "@/lib/api";
 
 interface LoginForm {
   email: string;
-  username: string;
   password: string;
 }
 
@@ -22,49 +21,56 @@ const Login = () => {
   const form = useForm<LoginForm>({
     defaultValues: {
       email: "",
-      username: "",
       password: "",
     },
   });
 
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
-    // try {
-    //   const response = await loginAPI(data);
-    //   if (response.success) {
-        // Store user data in localStorage
-        // localStorage.setItem("user", JSON.stringify(response.user));
+    try {
+      const response = await loginAPI({ email: data.email, password: data.password });
+      console.log('Login API (frontend) response:', response);
+      if (response && response.data && response.status) {
+        localStorage.setItem('authToken', response.data.access_token);
+        localStorage.setItem('refreshToken', response.data.refresh_token);
+        localStorage.setItem('user', JSON.stringify({
+          user_id: response.data.user_id,
+          username: response.data.username,
+          email: response.data.email,
+          ...response.data.user_data
+        }));
         toast({
           title: "Login successful!",
-          description: "Welcome back to PeerStar",
+          description: response.message || "Welcome back to Kudos",
         });
-        // Redirect to dashboard
         window.location.href = "/dashboard";
-    //   } else {
-    //     toast({
-    //       title: "Login failed",
-    //       description: response.message || "Invalid credentials",
-    //       variant: "destructive",
-    //     });
-    //   }
-    // } catch (error) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Something went wrong. Please try again.",
-    //     variant: "destructive",
-    //   });
-    // } finally {
-    //   setIsLoading(false);
-    // }
+      } else {
+        toast({
+          title: "Login failed",
+          description: response.message || "Invalid credentials",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen  flex items-center justify-center p-4  bg-gray-50">
       <div className="w-full max-w-md space-y-6">
         {/* Logo and Title */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2 ">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <img src="/Logoone.png" alt="Kudos Logo" className="h-14 w-14 rounded-xl shadow" />
+            <div className="p-3 bg-gradient-to-r from-primary to-accent  rounded-full">
+              <Star className="h-6 w-6 text-primary-foreground " fill="currentColor" />
+            </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent  bg-clip-text text-transparent">
               Kudos
             </h1>
@@ -101,31 +107,6 @@ const Login = () => {
                           {...field}
                           type="email"
                           placeholder="Enter your email"
-                          className="h-11"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="username"
-                  rules={{
-                    required: "Username is required",
-                    minLength: {
-                      value: 3,
-                      message: "Username must be at least 3 characters",
-                    },
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter your username"
                           className="h-11"
                         />
                       </FormControl>
