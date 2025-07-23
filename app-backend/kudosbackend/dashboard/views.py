@@ -290,10 +290,14 @@ class GetuserProfile(APIView):
                 category_name = star.recognition.category.name
                 category_counts[category_name] += 1
 
+            user_recognitions = Recognition.objects.filter(
+                receiver=user,
+            )
             return Response({
                 "user_id": user.id,
                 "name": user.get_full_name() if hasattr(user, "get_full_name") else user.username,
-                "star_summary": category_counts
+                "star_summary": category_counts,
+                "recognitions":RecognitionSerializer(user_recognitions, many=True).data,
             })
         except Exception as e:
             return Response(
