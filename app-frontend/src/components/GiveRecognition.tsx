@@ -34,8 +34,7 @@ export const GiveRecognition = ({ selectedEmployee,isFromGiveStar }: GiveRecogni
   const [selectedEmployees, setSelectedEmployees] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [message, setMessage] = useState<string>("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState<string>("");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [reviewer, setReviewer] = useState<string>("");
   const [employees, setEmployees] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -89,20 +88,9 @@ useEffect(() => {
   }, [employees, selectedEmployee, isFromGiveStar]);
 
 
-  const handleAddTag = (tag: string) => {
-    if (tag && !tags.includes(tag)) {
-      setTags([...tags, tag]);
-      setNewTag("");
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedEmployees || !category || !message || !reviewer || tags.length === 0) {
+    if (!selectedEmployees || !category || !message || !reviewer || selectedSkills.length === 0) {
       toast({
         title: "Please fill in all fields",
         description: "All fields are required to submit recognition.",
@@ -116,11 +104,8 @@ useEffect(() => {
       const categoryId = parseInt(category);
       const reviewerId = parseInt(reviewer);
       const sender = JSON.parse(localStorage.getItem('user') || '{}').user_id;
-      // Map tag names to skill IDs
-      const skillIds = tags.map(tag => {
-        const skill = skills.find((s: any) => s.name === tag);
-        return skill ? skill.id : null;
-      }).filter((id: number | null) => id !== null);
+      // Use selected skill IDs
+      const skillIds = selectedSkills.map(id => parseInt(id));
       const response = await giveRecognitionAPI({
         sender,
         receiver: receiverId,
@@ -137,8 +122,7 @@ useEffect(() => {
         setSelectedEmployees("");
         setCategory("");
         setMessage("");
-        setTags([]);
-        setNewTag("");
+        setSelectedSkills([]);
         setReviewer("");
       } else {
         toast({
@@ -232,60 +216,19 @@ useEffect(() => {
               </Select>
             </div>
 
-            {/* Tags */}
+            {/* Skills Dropdown */}
             <div className="space-y-2">
-              <label className="text-base font-semibold text-foreground">Skills & Tags</label>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Input
-                  placeholder="Add a tag (e.g., React, API Design)"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddTag(newTag);
-                    }
-                  }}
-                  className="flex-1 rounded-lg shadow bg-background/80"
-                />
-                <Button type="button" variant="outline" onClick={() => handleAddTag(newTag)} className="sm:w-auto rounded-lg">
-                  <Tag className="w-4 h-4 mr-1" /> Add
-                </Button>
-              </div>
-              {/* Suggested Tags */}
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">Popular tags:</p>
-                <div className="flex flex-wrap gap-2">
-                  {skills.slice(0, 8).map(skill => (
-                    <Badge
-                      key={skill.id}
-                      variant="outline"
-                      className="cursor-pointer rounded-full px-3 py-1 hover:bg-primary hover:text-primary-foreground transition"
-                      onClick={() => handleAddTag(skill.name)}
-                    >
-                      {skill.name}
-                    </Badge>
+              <label className="text-base font-semibold text-foreground">Skills</label>
+              <Select multiple value={selectedSkills} onValueChange={setSelectedSkills}>
+                <SelectTrigger className="rounded-lg shadow bg-background/80">
+                  <SelectValue placeholder="Select skills" />
+                </SelectTrigger>
+                <SelectContent>
+                  {skills.map((skill: any) => (
+                    <SelectItem key={skill.id} value={skill.id.toString()}>{skill.name}</SelectItem>
                   ))}
-                </div>
-              </div>
-              {/* Selected Tags */}
-              {tags.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">Selected tags:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {tags.map(tag => (
-                      <Badge
-                        key={tag}
-                        variant="secondary"
-                        className="cursor-pointer rounded-full px-3 py-1"
-                        onClick={() => handleRemoveTag(tag)}
-                      >
-                        {tag} ×
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Message */}

@@ -68,9 +68,7 @@ const Login = () => {
         {/* Logo and Title */}
         <div className="text-center space-y-2 ">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="p-3 bg-gradient-to-r from-primary to-accent  rounded-full">
-              <Star className="h-6 w-6 text-primary-foreground " fill="currentColor" />
-            </div>
+            <img src="/Logoone.png" alt="Kudos Logo" className="h-14 w-14 rounded-xl shadow" />
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent  bg-clip-text text-transparent">
               Kudos
             </h1>

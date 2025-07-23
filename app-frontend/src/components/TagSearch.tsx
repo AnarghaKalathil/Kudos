@@ -37,6 +37,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
    const [viewingEmployee, setViewingEmployee] = useState(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
+  const [selectedDesignation, setSelectedDesignation] = useState("all");
 
   useEffect(() => {
     getTeamsAPI().then((response) => {
@@ -67,13 +68,22 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (employee.skills || []).some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+      (employee.skills || []).some(skill => {
+        if (skill == null) return false;
+        const skillName = typeof skill === 'object' ? skill.name : skill;
+        return skillName && skillName.toLowerCase().includes(searchTerm.toLowerCase());
+      });
 
-    const matchesSkill = selectedSkill === "any-skill" || (employee.skills || []).includes(selectedSkill);
+    const matchesSkill = selectedSkill === "any-skill" || (employee.skills || []).some(skill => {
+      if (skill == null) return false;
+      const skillName = typeof skill === 'object' ? skill.name : skill;
+      return skillName === selectedSkill;
+    });
     const matchesDepartment = selectedDepartment === "all" || employee.department === selectedDepartment;
+    const matchesDesignation = selectedDesignation === "all" || employee.role === selectedDesignation;
     const matchesMinStars = employee.stars >= (parseInt(minStars) || 0);
 
-    return matchesSearch && matchesSkill && matchesDepartment && matchesMinStars;
+    return matchesSearch && matchesSkill && matchesDepartment && matchesDesignation && matchesMinStars;
   });
 
   const getSkillExpertise = (employee: Employee, skill: string) => {
@@ -82,8 +92,31 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
   };
 
   const departments = ["all", ...new Set(employees.map(emp => emp.department))];
+  const designations = ["all", ...new Set(employees.map(emp => emp.role).filter(Boolean))];
 
   const popularSkills = skills.slice(0, 8);
+
+  // Color palette for random badge colors
+  const badgeColors = [
+    'bg-primary/10 text-primary',
+    'bg-accent/10 text-accent',
+    'bg-info/10 text-info',
+    'bg-warning/10 text-warning',
+    'bg-success/10 text-success',
+    'bg-destructive/10 text-destructive',
+    'bg-secondary/20 text-secondary-foreground',
+    'bg-muted/10 text-muted-foreground',
+  ];
+
+  function getRandomBadgeColor(key: string) {
+    // Simple hash for consistent color per skill
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = key.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const idx = Math.abs(hash) % badgeColors.length;
+    return badgeColors[idx];
+  }
 
   return (
     <div className="space-y-10 mt-10">
@@ -99,7 +132,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
           <CardDescription className="text-base">Find the right person for your project or question</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             <div className="space-y-2">
               <label className="text-base font-semibold text-foreground">Search</label>
               <div className="relative">
@@ -126,6 +159,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                 </SelectContent>
               </Select>
             </div>
+
           </div>
         </CardContent>
       </Card>
@@ -174,6 +208,17 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4 flex-1 flex flex-col justify-end">
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {(employee.skills || []).map((skill, index) => {
+                    if (skill == null) return null;
+                    const skillName = typeof skill === 'object' ? skill.name : skill;
+                    return (
+                      <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-sm font-medium">
+                        {typeof skill === 'object' ? skill.name : skill}
+                      </Badge>
+                    );
+                  })}
+                </div>
                 <div className="flex gap-40 pt-2">
                   <Button
                     size="sm"
@@ -235,7 +280,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                     ) : (
                       (viewingEmployee.skills || []).map((skill, index) => (
                         <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-base font-medium">
-                          {skill}
+                          {skill == null ? '' : (typeof skill === 'object' ? skill.name : skill)}
                         </Badge>
                       ))
                     )}

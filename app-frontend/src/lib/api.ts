@@ -265,14 +265,16 @@ export const giveRecognitionAPI = async (recognition: {
 export const changeRecognitionStatusAPI = async (id: number, status: string): Promise<{ success: boolean; message?: string }> => {
   try {
     const url = `${API_BASE}/dashboard/api/recognition/status`;
+    const payload = { id, status };
     console.log('Recognition Status Change API URL:', url);
+    console.log('Recognition Status Change API payload:', payload);
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${getToken()}`,
       },
-      body: JSON.stringify({ id, status }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json().catch(() => ({}));
     console.log('Recognition Status Change API response:', data);
