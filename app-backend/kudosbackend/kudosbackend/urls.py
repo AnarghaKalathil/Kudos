@@ -4,6 +4,8 @@ from django.urls.conf import include
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
                                    SpectacularSwaggerView)
+from django.conf import settings
+from django.conf.urls.static import static
 
 @extend_schema(exclude=True)
 class HiddenSchemaView(SpectacularAPIView):
@@ -24,3 +26,6 @@ urlpatterns = [
     path("dashboard/", include("dashboard.urls")),
     path("admin-dashboard/", include("admin_dashboard.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
