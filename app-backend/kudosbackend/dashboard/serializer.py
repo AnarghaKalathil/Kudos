@@ -41,7 +41,7 @@ class RecognitionSerializer(serializers.ModelSerializer):
         fields = ["sender", "receiver", "category", "message", "skills", "reviewer"]
 
     def get_receiver(self, obj):
-        return obj.sender.username if obj.sender  else None
+        return obj.receiver.username if obj.sender  else None
 
     def get_sender(self, obj):
         return obj.sender.username if obj.sender  else None
