@@ -123,7 +123,7 @@ class RecognitionData(APIView):
     def get(self, request):
         try:
             user = request.user
-            recognition_list = Recognition.objects.filter(receiver=user).order_by("-id")
+            recognition_list = Recognition.objects.filter(reviewer=user).order_by("-id")
             serializer = serializer_obj.RecognitionListSerializer(recognition_list, many=True)
             return Response(
                 {"data": serializer.data, "status": True},
@@ -369,7 +369,7 @@ class GetuserProfile(APIView):
                 category_counts[category_name] += 1
 
             user_recognitions = Recognition.objects.filter(
-                receiver=user,
+                Q(receiver=user) | Q(sender=user)
             )
             return Response({
                 "user_id": user.id,
