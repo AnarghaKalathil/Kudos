@@ -28,6 +28,11 @@ class RecognitionListSerializer(serializers.ModelSerializer):
     def get_category(self, obj):
         return obj.category.name
 
+class RecognitionSwaggerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recognition
+        fields = ["sender", "receiver", "category", "message", "skills", "reviewer"]
+
 
 class RecognitionSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
