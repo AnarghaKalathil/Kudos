@@ -162,9 +162,18 @@ export const UnifiedDashboard = () => {
             </>
           )}
           {/* Admin Content */}
-          {isAdmin && activeTab === 'users' && <div className="w-full"><UsersPage /></div>}
-          {isAdmin && activeTab === 'categories' && <div className="w-full"><CategoriesPage /></div>}
-          {isAdmin && activeTab === 'skills' && <div className="w-full"><SkillList /></div>}
+          {isAdmin && (
+            <>
+              <div className="mb-6">
+                <div className="text-2xl font-bold text-primary bg-muted rounded-xl px-6 py-4 shadow w-fit border border-primary/20">
+                  Hi Admin 👋
+                </div>
+              </div>
+              {activeTab === 'users' && <div className="w-full"><UsersPage /></div>}
+              {activeTab === 'categories' && <div className="w-full"><CategoriesPage /></div>}
+              {activeTab === 'skills' && <div className="w-full"><SkillList /></div>}
+            </>
+          )}
           {/* User Content */}
           {!isAdmin && activeTab === 'directory' && <EmployeeDirectory onGiveStar={(employee) => { setSelectedEmployee({ id: employee.id.toString(), name: employee.name }); setIsFromGiveStar(true); setActiveTab('give'); }} />}
           {!isAdmin && activeTab === 'give' && <GiveRecognition selectedEmployee={selectedEmployee} isFromGiveStar={isFromGiveStar} />}
