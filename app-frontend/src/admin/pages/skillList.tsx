@@ -3,6 +3,7 @@ import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 import { Button } from '@/components/ui/button';
 import { getAllSkills, createSkill, deleteSkill } from '@/lib/adminApi';
+import Pagination from "@/components/Pagination";
 
 const SkillsPage: React.FC = () => {
   const [skills, setSkills] = useState<any[]>([]);
@@ -14,6 +15,11 @@ const SkillsPage: React.FC = () => {
   const [editId, setEditId] = useState<number | null>(null);
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const entriesPerPage = 10;
+
+  const paginatedSkills = skills.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
+  const totalPages = Math.ceil(skills.length / entriesPerPage);
 
   const fetchSkills = async () => {
     setLoading(true);
@@ -82,7 +88,10 @@ const SkillsPage: React.FC = () => {
         {loading ? (
           <div className="flex justify-center items-center py-6 text-muted-foreground text-base">Loading...</div>
         ) : (
-          <DataTable columns={columns} rows={skills} onDelete={handleDelete} />
+          <>
+            <DataTable columns={columns} rows={paginatedSkills} onDelete={handleDelete} />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          </>
         )}
         <FormModal
           open={open}

@@ -2,7 +2,7 @@
 
 const BASE_URL = 'http://140.245.218.8:8000';
 
-const getToken = () => localStorage.getItem('token');
+const getToken = () => localStorage.getItem('accessToken');
 
 const authHeaders = () => ({
   'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export const createUser = async (user: {
   first_name: string;
   last_name: string;
   designation: string;
-  department: string;
+  department?: string;
 }) => {
   const res = await fetch(`${BASE_URL}/admin-dashboard/api/users/create/`, {
     method: 'POST',

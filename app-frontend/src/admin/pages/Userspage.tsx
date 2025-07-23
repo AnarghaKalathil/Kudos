@@ -3,6 +3,7 @@ import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 import { Button } from '@/components/ui/button';
 import { getAllUsers, createUser, deleteUser } from '@/lib/adminApi';
+import Pagination from "@/components/Pagination";
 
 const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -10,24 +11,33 @@ const UsersPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    username: string;
+    email: string;
+    password: string;
+    first_name: string;
+    last_name: string;
+    designation: string;
+  }>({
     username: '',
     email: '',
     password: '',
     first_name: '',
     last_name: '',
-    designation: '',
-    department: ''
+    designation: ''
   });
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const entriesPerPage = 10;
 
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await getAllUsers();
-      setUsers(data);
+      // Sort by id descending (most recent first)
+      setUsers(data.sort((a, b) => b.id - a.id));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -46,8 +56,7 @@ const UsersPage: React.FC = () => {
       password: '',
       first_name: '',
       last_name: '',
-      designation: '',
-      department: ''
+      designation: ''
     });
     setOpen(true);
     setIsDeleteConfirm(false);
@@ -56,7 +65,8 @@ const UsersPage: React.FC = () => {
   const handleDelete = (id: number) => {
     const userToDelete = users.find((u) => u.id === id);
     if (userToDelete) {
-      setFormData({ ...userToDelete, password: '' });
+      const { department, ...rest } = userToDelete;
+      setFormData({ ...rest, password: '' });
       setDeleteId(id);
       setIsDeleteConfirm(true);
       setOpen(true);
@@ -70,7 +80,7 @@ const UsersPage: React.FC = () => {
         setUsers((prev) => prev.filter((u) => u.id !== deleteId));
       } else {
         const newUser = await createUser(formData);
-        setUsers((prev) => [...prev, newUser]);
+        setUsers((prev) => [newUser, ...prev]);
       }
       setOpen(false);
       setDeleteId(null);
@@ -85,9 +95,11 @@ const UsersPage: React.FC = () => {
     { key: 'email', label: 'Email' },
     { key: 'first_name', label: 'First Name' },
     { key: 'last_name', label: 'Last Name' },
-    { key: 'designation', label: 'Designation' },
-    { key: 'department', label: 'Department' }
+    { key: 'designation', label: 'Designation' }
   ];
+
+  const paginatedUsers = users.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
+  const totalPages = Math.ceil(users.length / entriesPerPage);
 
   return (
     <div className="w-full">
@@ -99,7 +111,10 @@ const UsersPage: React.FC = () => {
         {loading ? (
           <div className="flex justify-center items-center py-6 text-muted-foreground text-base">Loading...</div>
         ) : (
-          <DataTable columns={columns} rows={users} onDelete={handleDelete} />
+          <>
+            <DataTable columns={columns} rows={paginatedUsers} onDelete={handleDelete} />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          </>
         )}
         <FormModal
           open={open}

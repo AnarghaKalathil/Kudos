@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,26 @@ const FormModal: React.FC<Props> = ({
   title,
   isDeleteConfirm = false
 }) => {
+  const [passwordError, setPasswordError] = useState('');
+
+  const validatePassword = (value: string) => {
+    if (value && value.length > 0 && value.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+    } else {
+      setPasswordError('');
+    }
+  };
+
+  const onInputChange = (key: string, value: string) => {
+    setFormData({ ...formData, [key]: value });
+    if (key === 'password') validatePassword(value);
+  };
+
+  const onSubmit = () => {
+    if (passwordError) return;
+    handleSubmit();
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md p-6 rounded-lg">
@@ -47,8 +67,12 @@ const FormModal: React.FC<Props> = ({
                     id={key}
                     name={key}
                     value={formData[key]}
-                    onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                    onChange={(e) => onInputChange(key, e.target.value)}
+                    type={key === 'password' ? 'password' : 'text'}
                   />
+                  {key === 'password' && passwordError && (
+                    <span className="text-xs text-red-600 mt-1">{passwordError}</span>
+                  )}
                 </div>
               );
             })}
@@ -57,9 +81,10 @@ const FormModal: React.FC<Props> = ({
         <DialogFooter className="flex justify-end gap-2 mt-4">
           <Button variant="outline" onClick={handleClose} type="button">Cancel</Button>
           <Button
-            onClick={handleSubmit}
+            onClick={onSubmit}
             variant={isDeleteConfirm ? 'destructive' : 'default'}
             type="button"
+            disabled={!!passwordError}
           >
             {isDeleteConfirm ? 'Delete' : 'Submit'}
           </Button>
