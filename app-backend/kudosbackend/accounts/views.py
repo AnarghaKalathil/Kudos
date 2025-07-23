@@ -12,8 +12,6 @@ from .serializers import (LoginSwaggerSerializer, LogoutSwaggerSerializer,
 
 
 class LoginApiView(APIView):
-    serializer_class = LoginSwaggerSerializer
-
     @extend_schema(
         request=LoginSwaggerSerializer,
         summary="Login API",
@@ -89,7 +87,6 @@ class LoginApiView(APIView):
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = LogoutSwaggerSerializer
 
     @extend_schema(
         request=LogoutSwaggerSerializer,
