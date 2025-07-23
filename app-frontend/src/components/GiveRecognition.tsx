@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { getTeamsAPI, getCategoriesAPI, giveRecognitionAPI, getSkillsAPI } from "@/lib/api";
 
 interface Employee {
   id: string;
@@ -41,12 +42,12 @@ const categories = [
   "Technical Excellence"
 ];
 
-const suggestedTags = [
-  "React", "TypeScript", "Node.js", "API Design", "UI/UX", "Performance",
-  "Docker", "Kubernetes", "CI/CD", "AWS", "Database", "DevOps",
-  "Analytics", "Data Science", "Machine Learning", "Python",
-  "Figma", "Design Systems", "User Research", "Prototyping"
-];
+// const suggestedTags = [
+//   "React", "TypeScript", "Node.js", "API Design", "UI/UX", "Performance",
+//   "Docker", "Kubernetes", "CI/CD", "AWS", "Database", "DevOps",
+//   "Analytics", "Data Science", "Machine Learning", "Python",
+//   "Figma", "Design Systems", "User Research", "Prototyping"
+// ];
 
 const reviewerOptions = [
   { id: "manager", label: "Direct Manager" },
@@ -68,14 +69,56 @@ export const GiveRecognition = ({ selectedEmployee,isFromGiveStar }: GiveRecogni
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
   const [reviewer, setReviewer] = useState<string>("");
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [skills, setSkills] = useState<any[]>([]);
 
   const { toast } = useToast();
 
 useEffect(() => {
-  if (isFromGiveStar && selectedEmployee?.id) {
-    setSelectedEmployees(selectedEmployee.id);
-  }
-}, [selectedEmployee, isFromGiveStar]);
+  getTeamsAPI().then((response) => {
+    if (response && response.status && Array.isArray(response.data)) {
+      setEmployees(response.data.map((emp: any) => ({
+        id: emp.user_id,
+        name: emp.name,
+        role: emp.role || '',
+        department: emp.department || '',
+        initials: emp.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '',
+      })));
+    }
+  });
+  getCategoriesAPI().then((response) => {
+    if (response && response.status && Array.isArray(response.data)) {
+      setCategories(response.data.map((cat: any) => ({
+        id: cat.id,
+        name: cat.name
+      })));
+    }
+  });
+  getSkillsAPI().then((response) => {
+    if (response && response.status && Array.isArray(response.data)) {
+      setSkills(response.data);
+    }
+  });
+}, []);
+
+
+  useEffect(() => {
+    if (isFromGiveStar && selectedEmployee?.id) {
+      setSelectedEmployees(selectedEmployee.id);
+    }
+  }, [selectedEmployee, isFromGiveStar]);
+
+  // Ensure dropdown is prefilled after employees are loaded
+  useEffect(() => {
+    if (
+      isFromGiveStar &&
+      selectedEmployee?.id &&
+      employees.some(emp => emp.id.toString() === selectedEmployee.id.toString())
+    ) {
+      setSelectedEmployees(selectedEmployee.id);
+    }
+  }, [employees, selectedEmployee, isFromGiveStar]);
 
 
   const handleAddTag = (tag: string) => {
@@ -100,24 +143,56 @@ useEffect(() => {
       });
       return;
     }
-
-    const employee = mockEmployees.find(emp => emp.id === selectedEmployees);
-    
-    toast({
-      title: "Recognition sent for review!",
-      description: `Your recognition for ${employee?.name} has been sent to ${reviewer || "the manager"} for approval.`,
-    });
-
-    // Reset form
-    setSelectedEmployees("");
-    setCategory("");
-    setMessage("");
-    setTags([]);
-    setNewTag("");
-    setReviewer("");
+    try {
+      // Find integer IDs for receiver, category, reviewer
+      const receiverId = parseInt(selectedEmployees);
+      const categoryId = parseInt(category);
+      const reviewerId = parseInt(reviewer);
+      const sender = JSON.parse(localStorage.getItem('user') || '{}').user_id;
+      // Map tag names to skill IDs
+      const skillIds = tags.map(tag => {
+        const skill = skills.find((s: any) => s.name === tag);
+        return skill ? skill.id : null;
+      }).filter((id: number | null) => id !== null);
+      const response = await giveRecognitionAPI({
+        sender,
+        receiver: receiverId,
+        category: categoryId,
+        message,
+        skills: skillIds,
+        reviewer: reviewerId,
+      });
+      if (response.success) {
+        toast({
+          title: "Recognition sent for review!",
+          description: response.message,
+        });
+        setSelectedEmployees("");
+        setCategory("");
+        setMessage("");
+        setTags([]);
+        setNewTag("");
+        setReviewer("");
+      } else {
+        toast({
+          title: "Error",
+          description: response.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const selectedEmployeeData = mockEmployees.find(emp => emp.id === selectedEmployees);
+  const selectedEmployeeData = employees.find(emp => emp.id === parseInt(selectedEmployees));
+
+  // Add a key to the form to force remount when selectedEmployee changes
+  const formKey = selectedEmployee?.id || 'default';
 
   return (
     <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
@@ -138,7 +213,7 @@ useEffect(() => {
         </CardHeader>
         
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form key={formKey} onSubmit={handleSubmit} className="space-y-8">
             {/* Employee Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Who are you recognizing?</label>
@@ -147,11 +222,11 @@ useEffect(() => {
                   <SelectValue placeholder="Select a teammate" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockEmployees.map(employee => (
-                    <SelectItem key={employee.id} value={employee.id}>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {employees.map(employee => (
+                    <SelectItem key={employee.id} value={employee.id.toString()}>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
+                          <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
                             {employee.initials}
                           </AvatarFallback>
                         </Avatar>
@@ -189,7 +264,7 @@ useEffect(() => {
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -220,15 +295,15 @@ useEffect(() => {
               {/* Suggested Tags */}
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">Popular tags:</p>
-                <div className="flex flex-wrap gap-1">
-                  {suggestedTags.slice(0, 8).map(tag => (
+                <div className="flex flex-wrap gap-2">
+                  {skills.slice(0, 8).map(skill => (
                     <Badge
-                      key={tag}
+                      key={skill.id}
                       variant="outline"
-                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
-                      onClick={() => handleAddTag(tag)}
+                      className="cursor-pointer rounded-full px-3 py-1 hover:bg-primary hover:text-primary-foreground transition"
+                      onClick={() => handleAddTag(skill.name)}
                     >
-                      {tag}
+                      {skill.name}
                     </Badge>
                   ))}
                 </div>
@@ -272,12 +347,12 @@ useEffect(() => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select reviewer" />
                 </SelectTrigger>
-                         <SelectContent>
-                  {mockEmployees.map(employee => (
-                    <SelectItem key={employee.id} value={employee.id}>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                <SelectContent>
+                  {employees.map(employee => (
+                    <SelectItem key={employee.id} value={employee.id.toString()}>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
+                          <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
                             {employee.initials}
                           </AvatarFallback>
                         </Avatar>

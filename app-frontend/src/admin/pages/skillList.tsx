@@ -37,12 +37,14 @@ const SkillsPage: React.FC = () => {
     setEditId(null);
     setOpen(true);
     setIsDeleteConfirm(false);
+    setIsDeleteConfirm(false);
   };
 
   const handleEdit = (skill: any) => {
     setFormData({ name: skill.name });
     setEditId(skill.id);
     setOpen(true);
+    setIsDeleteConfirm(false);
     setIsDeleteConfirm(false);
   };
 

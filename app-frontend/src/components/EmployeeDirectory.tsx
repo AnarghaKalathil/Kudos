@@ -118,6 +118,25 @@ export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+
+  useEffect(() => {
+    getTeamsAPI().then((response) => {
+      if (response && response.status && Array.isArray(response.data)) {
+        const mapped = response.data.map((emp: any) => ({
+          id: emp.user_id,
+          name: emp.name,
+          role: emp.role || '',
+          stars: emp.star_count || 0,
+          skills: emp.skills || [],
+          email: emp.email,
+          initials: emp.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '',
+          level: emp.level || 1,
+        }));
+        setEmployees(mapped);
+      }
+    });
+  }, []);
 
   const filteredEmployees = mockEmployees.filter(employee => {
     const matchesSearch = 
