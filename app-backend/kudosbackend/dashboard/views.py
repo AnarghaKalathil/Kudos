@@ -85,7 +85,7 @@ class Dashboard(APIView):
                     total_skill_count = Skills.objects.count()
 
             return Response({
-                "user_data":{
+                "user_data": {
                     "star_count": star_count,
                     "recognitions": {
                         "pending": RecognitionListSerializer(pending, many=True).data,
@@ -232,7 +232,6 @@ class RecognitionStatusChange(APIView):
     permission_classes = [IsAuthenticated, ]
     serializer_class = StatusUpdateSerializer
 
-
     @extend_schema(
         request=StatusUpdateSerializer,
         summary="Recognition Status Change API's",
@@ -280,6 +279,10 @@ class GetuserProfile(APIView):
         try:
             user = request.user
 
+            total_stars = Star.objects.filter(
+                recognition__receiver=user
+            ).count()
+
             stars = Star.objects.filter(
                 recognition__receiver=user
             ).select_related('recognition__category')
@@ -297,7 +300,8 @@ class GetuserProfile(APIView):
                 "user_id": user.id,
                 "name": user.get_full_name() if hasattr(user, "get_full_name") else user.username,
                 "star_summary": category_counts,
-                "recognitions":RecognitionSerializer(user_recognitions, many=True).data,
+                "total_stars": total_stars,
+                "recognitions": RecognitionSerializer(user_recognitions, many=True).data,
             })
         except Exception as e:
             return Response(
