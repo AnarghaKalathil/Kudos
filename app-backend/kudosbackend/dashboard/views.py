@@ -54,34 +54,35 @@ class Dashboard(APIView):
             total_contributors = ""
             total_star_count = ""
             total_skill_count = ""
-            for u in top_users_qs:
-                recognitions = Recognition.objects.filter(receiver=u, status=RecognitionStatus.APPROVED)
+            if top_users_qs:
+                for u in top_users_qs:
+                    recognitions = Recognition.objects.filter(receiver=u, status=RecognitionStatus.APPROVED)
 
-                user_categories = Category.objects.filter(
-                    recognitions_category__in=recognitions
-                ).distinct()
+                    user_categories = Category.objects.filter(
+                        recognitions_category__in=recognitions
+                    ).distinct()
 
-                user_skills = Skills.objects.filter(
-                    recognitions__in=recognitions
-                ).distinct()
+                    user_skills = Skills.objects.filter(
+                        recognitions__in=recognitions
+                    ).distinct()
 
-                top_users.append({
-                    "username": u.username,
-                    "first_name": u.first_name,
-                    "last_name": u.last_name,
-                    "star_count": u.star_count,
-                    "categories": CategorySerializer(user_categories, many=True).data,
-                    "skills": SkillSerializer(user_skills, many=True).data,
-                })
-                total_users = KudosUser.objects.filter(is_superuser=False).count()
+                    top_users.append({
+                        "username": u.username,
+                        "first_name": u.first_name,
+                        "last_name": u.last_name,
+                        "star_count": u.star_count,
+                        "categories": CategorySerializer(user_categories, many=True).data,
+                        "skills": SkillSerializer(user_skills, many=True).data,
+                    })
+                    total_users = KudosUser.objects.filter(is_superuser=False).count()
 
-                total_contributors = KudosUser.objects.filter(
-                    recognitions_given__isnull=False
-                ).distinct().count()
+                    total_contributors = KudosUser.objects.filter(
+                        recognitions_given__isnull=False
+                    ).distinct().count()
 
-                total_star_count = Star.objects.count()
+                    total_star_count = Star.objects.count()
 
-                total_skill_count = Skills.objects.count()
+                    total_skill_count = Skills.objects.count()
 
             return Response({
                 "user_data":{
