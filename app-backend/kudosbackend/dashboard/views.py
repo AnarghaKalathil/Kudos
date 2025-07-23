@@ -136,13 +136,13 @@ class RecognitionData(APIView):
             )
 
     @extend_schema(
-        request=serializer_obj.RecognitionSerializer,
+        request=serializer_obj.RecognitionSwaggerSerializer,
         summary="Add New Recognition",
         tags=["Recognition API's"]
     )
     def post(self, request):
         try:
-            serializer = serializer_obj.RecognitionSerializer(data=request.data)
+            serializer = serializer_obj.RecognitionSwaggerSerializer(data=request.data)
 
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
