@@ -20,7 +20,7 @@ from .permissions import IsAdminUser
     tags=["Admin Dashboard"]
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsAdminUser])
+@permission_classes([IsAuthenticated, ])
 def user_list(request):
     """Get all users (admin only)"""
     users = KudosUser.objects.all().order_by('-date_joined')
@@ -103,7 +103,7 @@ def delete_user(request, user_id):
     tags=["Admin Dashboard"]
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsAdminUser])
+@permission_classes([IsAuthenticated, ])
 def skills_list(request):
     """Get all skills (admin only)"""
     skills = Skills.objects.all().order_by('name')
@@ -179,7 +179,7 @@ def delete_skill(request, skill_id):
     tags=["Admin Dashboard"]
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsAdminUser])
+@permission_classes([IsAuthenticated, ])
 def categories_list(request):
     """Get all categories (admin only)"""
     categories = Category.objects.all().order_by('name')
