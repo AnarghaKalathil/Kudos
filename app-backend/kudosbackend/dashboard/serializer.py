@@ -17,10 +17,10 @@ class RecognitionListSerializer(serializers.ModelSerializer):
                   "reviewer", "skills", "status"]
 
     def get_sender(self, obj):
-        return obj.sender.username
+        return obj.sender.username if obj.sender.username  else None
 
     def get_reviewer(self, obj):
-        return obj.reviewer.username
+        return obj.reviewer.username if obj.reviewer.username else None
 
     def get_skills(self, obj):
         return obj.skills.all().values_list("name", flat=True)
