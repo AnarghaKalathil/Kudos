@@ -193,11 +193,11 @@ const Index = () => {
             </section>
           )}
           {/* Directory */}
-          {activeTab === 'directory' && <EmployeeDirectory onGiveStar={(employee) => { setSelectedEmployee(employee); setIsFromGiveStar(true); setActiveTab('give'); }} />}
+          {activeTab === 'directory' && <EmployeeDirectory onGiveStar={(employee) => { setSelectedEmployee({ id: employee.id.toString(), name: employee.name }); setIsFromGiveStar(true); setActiveTab('give'); }} />}
           {/* Give Star */}
           {activeTab === 'give' && <GiveRecognition selectedEmployee={selectedEmployee} isFromGiveStar={isFromGiveStar} />}
           {/* Tag Search */}
-          {activeTab === 'search' && <TagSearch onGiveStar={(employee) => { setSelectedEmployee(employee); setIsFromGiveStar(true); setActiveTab('give'); }} />}
+          {activeTab === 'search' && <TagSearch onGiveStar={(employee) => { setSelectedEmployee({ id: employee.id.toString(), name: employee.name }); setIsFromGiveStar(true); setActiveTab('give'); }} />}
           {/* Profile */}
           {activeTab === 'profile' && <UserProfile />}
           {/* Reviews */}

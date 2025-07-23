@@ -46,7 +46,21 @@ export default function RecognitionTabs() {
 
   useEffect(() => {
     getAllRecognitionsAPI().then((data) => {
-      if (Array.isArray(data)) setRecognitions(data);
+      if (Array.isArray(data)) {
+        // Map backend fields to UI fields
+        const mapped = data.map((item, idx) => ({
+          id: item.id?.toString() || idx.toString(),
+          from: item.sender || '',
+          to: item.reviewer || '',
+          skill: Array.isArray(item.skills) ? item.skills.join(', ') : (item.skills || ''),
+          category: item.category || '',
+          date: item.created_at ? new Date(item.created_at).toLocaleDateString() : '',
+          message: item.message || '',
+          tags: Array.isArray(item.skills) ? item.skills : [],
+          status: (item.status || '').toLowerCase(),
+        }));
+        setRecognitions(mapped);
+      }
     });
   }, []);
 

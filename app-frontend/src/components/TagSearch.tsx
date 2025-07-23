@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { getTeamsAPI } from "@/lib/api";
+import { getTeamsAPI, getSkillsAPI } from "@/lib/api";
 
 interface Employee {
   id: string;
@@ -39,12 +39,26 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
   const [skills, setSkills] = useState<string[]>([]);
 
   useEffect(() => {
-    getTeamsAPI().then((data) => {
-      if (Array.isArray(data)) {
-        setEmployees(data);
-        // Extract all unique skills
-        const all = Array.from(new Set(data.flatMap(emp => emp.skills || []))).sort();
-        setSkills(all);
+    getTeamsAPI().then((response) => {
+      if (response && response.status && Array.isArray(response.data)) {
+        // Map backend fields to Employee interface
+        const mapped = response.data.map((emp: any) => ({
+          id: emp.user_id,
+          name: emp.name,
+          role: emp.role || '',
+          department: emp.department || '',
+          stars: emp.star_count || 0,
+          skills: emp.skills || [],
+          recognitions: emp.recognitions || [],
+          email: emp.email,
+          initials: emp.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '',
+        }));
+        setEmployees(mapped);
+      }
+    });
+    getSkillsAPI().then((response) => {
+      if (response && response.status && Array.isArray(response.data)) {
+        setSkills(response.data.map((skill: any) => skill.name));
       }
     });
   }, []);
@@ -184,7 +198,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
       </div>
       {viewingEmployee && (
         <Dialog open={!!viewingEmployee} onOpenChange={() => setViewingEmployee(null)}>
-          <DialogContent className="max-w-3xl rounded-2xl shadow-xl bg-white/90 backdrop-blur-lg">
+         <DialogContent className="max-w-3xl rounded-2xl shadow-xl bg-white/90 backdrop-blur-lg">
             <Card className="shadow-none bg-transparent w-full">
               <CardContent className="pt-8 pb-6">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
@@ -203,7 +217,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                     <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 mt-4">
                       <div className="flex items-center gap-2">
                         <Star className="w-6 h-6 text-star" />
-                        <span className="text-2xl sm:text-3xl font-extrabold text-star">{viewingEmployee.stars}</span>
+                        <span className="text-2xl sm:text-3xl font-extrabold text-star">{viewingEmployee.star_count ?? viewingEmployee.stars ?? 0}</span>
                         <span className="text-base text-muted-foreground">stars earned</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -212,35 +226,34 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                     </div>
                   </div>
                 </div>
-                {/* Top Skills */}
+                {/* Skills */}
                 <div className="mt-8 space-y-2">
-                  <h4 className="text-base font-semibold text-foreground">Top Skills</h4>
-                  <div className="space-y-1">
-                    {viewingEmployee.recognitions.slice(0, 3).map((recognition, index) => (
-                      <div key={index} className="flex items-center justify-between text-base">
-                        <span className="text-foreground">{recognition.skill}</span>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-star" />
-                          <span className="text-star font-semibold">{recognition.count}</span>
-                        </div>
-                      </div>
-                    ))}
+                  <h4 className="text-base font-semibold text-foreground">Skills</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {(viewingEmployee.skills || []).length === 0 ? (
+                      <span className="text-muted-foreground text-sm">No skills listed.</span>
+                    ) : (
+                      (viewingEmployee.skills || []).map((skill, index) => (
+                        <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-base font-medium">
+                          {skill}
+                        </Badge>
+                      ))
+                    )}
                   </div>
                 </div>
-                {/* All Skills */}
-                <div className="mt-4 space-y-2">
-                  <h4 className="text-base font-semibold text-foreground">All Badges</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {(viewingEmployee.skills || []).map((skill, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className={`rounded-full px-3 py-1 text-base font-medium ${selectedSkill === skill ? "bg-primary text-primary-foreground" : ""}`}
-                        onClick={() => setSelectedSkill(selectedSkill === skill ? "any-skill" : skill)}
-                      >
-                        {skill}
-                      </Badge>
-                    ))}
+                {/* Recognitions */}
+                <div className="mt-8 space-y-2">
+                  <h4 className="text-base font-semibold text-foreground">Recognitions</h4>
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      <span className="font-semibold">Pending:</span> {(viewingEmployee.recognitions?.pending?.length ?? 0)}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Approved:</span> {(viewingEmployee.recognitions?.approved?.length ?? 0)}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Rejected:</span> {(viewingEmployee.recognitions?.rejected?.length ?? 0)}
+                    </div>
                   </div>
                 </div>
               </CardContent>

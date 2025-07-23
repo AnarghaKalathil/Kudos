@@ -63,15 +63,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen  flex items-center justify-center p-4">
+    <div className="min-h-screen  flex items-center justify-center p-4  bg-gray-50">
       <div className="w-full max-w-md space-y-6">
         {/* Logo and Title */}
         <div className="text-center space-y-2 ">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="p-3 bg-gradient-to-r from-primary to-secondary rounded-full">
-              <Star className="h-6 w-6 text-primary-foreground" fill="currentColor" />
+            <div className="p-3 bg-gradient-to-r from-primary to-accent  rounded-full">
+              <Star className="h-6 w-6 text-primary-foreground " fill="currentColor" />
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent  bg-clip-text text-transparent">
               Kudos
             </h1>
           </div>
@@ -79,16 +79,16 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <Card className="shadow-xl border-0 bg-white backdrop-blur-sm">
+        <Card className="shadow-2xl  bg-white backdrop-blur-sm border-spacing-5">
           <CardHeader className="space-y-2 pb-4">
-            <CardTitle className="text-xl text-center">Welcome back</CardTitle>
+            <CardTitle className="text-xl text-center">Sign in</CardTitle>
             <CardDescription className="text-center">
               Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
                   name="email"
@@ -158,7 +158,7 @@ const Login = () => {
 
                 <Button
                   type="submit"
-                  className="w-full h-11"
+                  className="w-full h-11 bg-gradient-to-r from-primary to-accent mb-16 mt-6"
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign in"}
@@ -166,14 +166,7 @@ const Login = () => {
               </form>
             </Form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                New to PeerStar?{" "}
-                <button className="text-primary hover:underline font-medium">
-                  Contact your admin
-                </button>
-              </p>
-            </div>
+
           </CardContent>
         </Card>
 

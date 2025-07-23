@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { getTeamsAPI, getCategoriesAPI, giveRecognitionAPI } from "@/lib/api";
+import { getTeamsAPI, getCategoriesAPI, giveRecognitionAPI, getSkillsAPI } from "@/lib/api";
 
 interface Employee {
   id: string;
@@ -42,12 +42,12 @@ const categories = [
   "Technical Excellence"
 ];
 
-const suggestedTags = [
-  "React", "TypeScript", "Node.js", "API Design", "UI/UX", "Performance",
-  "Docker", "Kubernetes", "CI/CD", "AWS", "Database", "DevOps",
-  "Analytics", "Data Science", "Machine Learning", "Python",
-  "Figma", "Design Systems", "User Research", "Prototyping"
-];
+// const suggestedTags = [
+//   "React", "TypeScript", "Node.js", "API Design", "UI/UX", "Performance",
+//   "Docker", "Kubernetes", "CI/CD", "AWS", "Database", "DevOps",
+//   "Analytics", "Data Science", "Machine Learning", "Python",
+//   "Figma", "Design Systems", "User Research", "Prototyping"
+// ];
 
 
 interface GiveRecognitionProps {
@@ -65,15 +65,34 @@ export const GiveRecognition = ({ selectedEmployee,isFromGiveStar }: GiveRecogni
   const [reviewer, setReviewer] = useState<string>("");
   const [employees, setEmployees] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [skills, setSkills] = useState<any[]>([]);
 
   const { toast } = useToast();
 
 useEffect(() => {
-  getTeamsAPI().then((data) => {
-    if (Array.isArray(data)) setEmployees(data);
+  getTeamsAPI().then((response) => {
+    if (response && response.status && Array.isArray(response.data)) {
+      setEmployees(response.data.map((emp: any) => ({
+        id: emp.user_id,
+        name: emp.name,
+        role: emp.role || '',
+        department: emp.department || '',
+        initials: emp.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '',
+      })));
+    }
   });
-  getCategoriesAPI().then((data) => {
-    if (Array.isArray(data)) setCategories(data);
+  getCategoriesAPI().then((response) => {
+    if (response && response.status && Array.isArray(response.data)) {
+      setCategories(response.data.map((cat: any) => ({
+        id: cat.id,
+        name: cat.name
+      })));
+    }
+  });
+  getSkillsAPI().then((response) => {
+    if (response && response.status && Array.isArray(response.data)) {
+      setSkills(response.data);
+    }
   });
 }, []);
 
@@ -83,6 +102,17 @@ useEffect(() => {
       setSelectedEmployees(selectedEmployee.id);
     }
   }, [selectedEmployee, isFromGiveStar]);
+
+  // Ensure dropdown is prefilled after employees are loaded
+  useEffect(() => {
+    if (
+      isFromGiveStar &&
+      selectedEmployee?.id &&
+      employees.some(emp => emp.id.toString() === selectedEmployee.id.toString())
+    ) {
+      setSelectedEmployees(selectedEmployee.id);
+    }
+  }, [employees, selectedEmployee, isFromGiveStar]);
 
 
   const handleAddTag = (tag: string) => {
@@ -112,13 +142,17 @@ useEffect(() => {
       const categoryId = parseInt(category);
       const reviewerId = parseInt(reviewer);
       const sender = JSON.parse(localStorage.getItem('user') || '{}').user_id;
-      // For skills, you may need to map tag names to IDs if available
+      // Map tag names to skill IDs
+      const skillIds = tags.map(tag => {
+        const skill = skills.find((s: any) => s.name === tag);
+        return skill ? skill.id : null;
+      }).filter((id: number | null) => id !== null);
       const response = await giveRecognitionAPI({
         sender,
         receiver: receiverId,
         category: categoryId,
         message,
-        skills: [], // TODO: map tags to skill IDs if available
+        skills: skillIds,
         reviewer: reviewerId,
       });
       if (response.success) {
@@ -150,6 +184,9 @@ useEffect(() => {
 
   const selectedEmployeeData = employees.find(emp => emp.id === parseInt(selectedEmployees));
 
+  // Add a key to the form to force remount when selectedEmployee changes
+  const formKey = selectedEmployee?.id || 'default';
+
   return (
     <div className="max-w-2xl mx-auto space-y-8 px-4 sm:px-0 mt-10">
       <div className="text-center mb-2">
@@ -165,7 +202,7 @@ useEffect(() => {
           <CardDescription className="text-base">Select a teammate and describe how they helped you</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form key={formKey} onSubmit={handleSubmit} className="space-y-8">
             {/* Employee Selection */}
             <div className="space-y-2">
               <label className="text-base font-semibold text-foreground">Who are you recognizing?</label>
@@ -175,7 +212,7 @@ useEffect(() => {
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map(employee => (
-                    <SelectItem key={employee.id} value={employee.id}>
+                    <SelectItem key={employee.id} value={employee.id.toString()}>
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
                           <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
@@ -215,7 +252,7 @@ useEffect(() => {
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -245,14 +282,14 @@ useEffect(() => {
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">Popular tags:</p>
                 <div className="flex flex-wrap gap-2">
-                  {suggestedTags.slice(0, 8).map(tag => (
+                  {skills.slice(0, 8).map(skill => (
                     <Badge
-                      key={tag}
+                      key={skill.id}
                       variant="outline"
                       className="cursor-pointer rounded-full px-3 py-1 hover:bg-primary hover:text-primary-foreground transition"
-                      onClick={() => handleAddTag(tag)}
+                      onClick={() => handleAddTag(skill.name)}
                     >
-                      {tag}
+                      {skill.name}
                     </Badge>
                   ))}
                 </div>
@@ -298,7 +335,7 @@ useEffect(() => {
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map(employee => (
-                    <SelectItem key={employee.id} value={employee.id}>
+                    <SelectItem key={employee.id} value={employee.id.toString()}>
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
                           <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">

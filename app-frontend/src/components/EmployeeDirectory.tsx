@@ -29,8 +29,20 @@ export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
-    getTeamsAPI().then((data) => {
-      if (Array.isArray(data)) setEmployees(data);
+    getTeamsAPI().then((response) => {
+      if (response && response.status && Array.isArray(response.data)) {
+        const mapped = response.data.map((emp: any) => ({
+          id: emp.user_id,
+          name: emp.name,
+          role: emp.role || '',
+          stars: emp.star_count || 0,
+          skills: emp.skills || [],
+          email: emp.email,
+          initials: emp.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '',
+          level: emp.level || 1,
+        }));
+        setEmployees(mapped);
+      }
     });
   }, []);
 

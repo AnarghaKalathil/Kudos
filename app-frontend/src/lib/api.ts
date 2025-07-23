@@ -363,6 +363,10 @@ export const getAllRecognitionsAPI = async () => {
     });
     const data = await res.json();
     console.log('Get All Recognitions API response:', data);
+    // If response is {data: [...], status: true}, return data.data
+    if (data && Array.isArray(data.data)) {
+      return data.data;
+    }
     return data;
   } catch (e) {
     console.log('Get All Recognitions API error:', e);
@@ -495,7 +499,7 @@ export const deleteUserAPI = async (user_id: number) => {
 // Admin: Get all skills
 export const getSkillsAPI = async () => {
   try {
-    const url = `${API_BASE}/admin-dashboard/skills/`;
+    const url = `${API_BASE}/admin-dashboard/api/skills/`;
     console.log('Get Skills API URL:', url);
     const res = await fetch(url, {
       method: 'GET',
