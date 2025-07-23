@@ -8,3 +8,9 @@ class KudosUser(AbstractUser):
 
     def __str__(self):
         return self.username if self.username else ""
+
+class DeviceToken(models.Model):
+    user = models.ForeignKey(KudosUser, on_delete=models.CASCADE)
+    token = models.CharField(max_length=255)
+    device_type = models.CharField(max_length=10, choices=(('android', 'Android'), ('ios', 'iOS')))
+    created_at = models.DateTimeField(auto_now_add=True)

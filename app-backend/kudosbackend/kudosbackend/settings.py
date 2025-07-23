@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     "drf_spectacular_sidecar",
     "corsheaders",
     "accounts",
-    "dashboard",
+    "dashboard.apps.DashboardConfig",
     "admin_dashboard",
 ]
 
