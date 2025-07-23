@@ -6,15 +6,18 @@ from dashboard.models import Recognition, Skills
 
 class RecognitionListSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
+    receiver = serializers.SerializerMethodField()
     reviewer = serializers.SerializerMethodField()
     skills = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
 
     class Meta:
         model = Recognition
-        fields = ["category", "message", "is_reviewed",
+        fields = ["receiver","category", "message", "is_reviewed",
                   "reviewed_at", "created_at", "sender",
                   "reviewer", "skills", "status","id"]
+    def get_receiver(self, obj):
+        return obj.receiver.username if obj.sender  else None
 
     def get_sender(self, obj):
         return obj.sender.username if obj.sender  else None
