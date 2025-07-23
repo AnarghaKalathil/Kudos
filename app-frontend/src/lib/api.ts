@@ -117,30 +117,54 @@ const mockRecognitions: Recognition[] = [
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Utility to get/set tokens
+const getToken = () => localStorage.getItem('authToken');
+const setToken = (token: string) => localStorage.setItem('authToken', token);
+const removeToken = () => localStorage.removeItem('authToken');
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+
 // Login API
-export const loginAPI = async (credentials: {
-  email: string;
-  username: string;
-  password: string;
-}): Promise<LoginResponse> => {
-  await delay(1000);
-  
-  // Mock authentication logic
-  const user = mockUsers.find(u => 
-    u.email === credentials.email && u.username === credentials.username
-  );
-  
-  if (user && credentials.password.length >= 6) {
-    return {
-      success: true,
-      user
-    };
+export const loginAPI = async (credentials: { email: string; password: string; }) => {
+  try {
+    const url = `${API_BASE}/accounts/api/login/`;
+    console.log('Login API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials),
+    });
+    const data = await res.json();
+    console.log('Login API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Login API error:', e);
+    return { status: false, message: 'Network error' };
   }
-  
-  return {
-    success: false,
-    message: "Invalid credentials"
-  };
+};
+
+// Logout API
+export const logoutAPI = async (): Promise<{ success: boolean; message?: string }> => {
+  const refresh = localStorage.getItem('refreshToken');
+  try {
+    const url = `${API_BASE}/accounts/api/logout/`;
+    console.log('Logout API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refresh }),
+    });
+    const data = await res.json().catch(() => ({}));
+    console.log('Logout API response:', data);
+    removeToken();
+    localStorage.removeItem('refreshToken');
+    return { success: true };
+  } catch (e) {
+    console.log('Logout API error:', e);
+    removeToken();
+    localStorage.removeItem('refreshToken');
+    return { success: false, message: 'Logout error' };
+  }
 };
 
 // Get all employees API
@@ -186,59 +210,80 @@ export const searchExpertsAPI = async (tags: string[]): Promise<User[]> => {
 };
 
 // Get user profile API
-export const getUserProfileAPI = async (userId: string): Promise<User | null> => {
-  await delay(300);
-  
-  return mockUsers.find(user => user.id === userId) || null;
+export const getUserProfileAPI = async () => {
+  try {
+    const url = `${API_BASE}/dashboard/api/profile`;
+    console.log('Get User Profile API URL:', url);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    console.log('Get User Profile API response:', data);
+    return data;
+  } catch (e) {
+    console.log('Get User Profile API error:', e);
+    return null;
+  }
 };
 
-// Give recognition API
+// Give recognition API (Swagger: sender, receiver, category, message, skills, reviewer)
 export const giveRecognitionAPI = async (recognition: {
-  toUserId: string;
-  stars: number;
-  comment: string;
-  tags: string[];
-  category: string;
-  reviewerId: string;
+  sender: number;
+  receiver: number;
+  category: number;
+  message: string;
+  skills: number[];
+  reviewer?: number;
 }): Promise<{ success: boolean; message: string; recognitionId?: string }> => {
-  await delay(800);
-  
-  // Mock validation
-  if (recognition.stars < 1 || recognition.stars > 5) {
-    return {
-      success: false,
-      message: "Stars must be between 1 and 5"
-    };
+  try {
+    const url = `${API_BASE}/dashboard/api/recognition/`;
+    console.log('Give Recognition API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(recognition),
+    });
+    const data = await res.json().catch(() => ({}));
+    console.log('Give Recognition API response:', data);
+    if (res.ok) {
+      return { success: true, message: 'Recognition submitted', recognitionId: data.id };
+    }
+    return { success: false, message: data.message || 'Failed to submit recognition' };
+  } catch (e) {
+    console.log('Give Recognition API error:', e);
+    return { success: false, message: 'Network error' };
   }
-  
-  if (recognition.comment.length < 10) {
-    return {
-      success: false,
-      message: "Comment must be at least 10 characters"
-    };
+};
+
+// Recognition status change API (Swagger: id, status)
+export const changeRecognitionStatusAPI = async (id: number, status: string): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const url = `${API_BASE}/dashboard/api/recognition/status`;
+    console.log('Recognition Status Change API URL:', url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ id, status }),
+    });
+    const data = await res.json().catch(() => ({}));
+    console.log('Recognition Status Change API response:', data);
+    if (res.ok) {
+      return { success: true };
+    }
+    return { success: false, message: data.message || 'Failed to change status' };
+  } catch (e) {
+    console.log('Recognition Status Change API error:', e);
+    return { success: false, message: 'Network error' };
   }
-  
-  // Mock successful creation
-  const newRecognition: Recognition = {
-    id: Date.now().toString(),
-    fromUser: mockUsers[0], // Current user
-    toUser: mockUsers.find(u => u.id === recognition.toUserId)!,
-    stars: recognition.stars,
-    comment: recognition.comment,
-    tags: recognition.tags,
-    category: recognition.category,
-    status: 'pending',
-    reviewerId: recognition.reviewerId,
-    createdAt: new Date().toISOString()
-  };
-  
-  mockRecognitions.push(newRecognition);
-  
-  return {
-    success: true,
-    message: "Recognition submitted successfully and sent for review",
-    recognitionId: newRecognition.id
-  };
 };
 
 // Get leaderboard API
