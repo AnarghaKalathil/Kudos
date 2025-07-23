@@ -30,9 +30,30 @@ class RecognitionListSerializer(serializers.ModelSerializer):
 
 
 class RecognitionSerializer(serializers.ModelSerializer):
+    sender = serializers.SerializerMethodField()
+    receiver = serializers.SerializerMethodField()
+    reviewer = serializers.SerializerMethodField()
+    skills = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+
     class Meta:
         model = Recognition
         fields = ["sender", "receiver", "category", "message", "skills", "reviewer"]
+
+    def get_receiver(self, obj):
+        return obj.sender.username if obj.sender  else None
+
+    def get_sender(self, obj):
+        return obj.sender.username if obj.sender  else None
+
+    def get_reviewer(self, obj):
+        return obj.reviewer.username if obj.reviewer else None
+
+    def get_skills(self, obj):
+        return obj.skills.all().values_list("name", flat=True)
+
+    def get_category(self, obj):
+        return obj.category.name
 
 
 class SkillListSerializer(serializers.ModelSerializer):
