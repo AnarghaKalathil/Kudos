@@ -188,19 +188,6 @@ useEffect(() => {
                   ))}
                 </SelectContent>
               </Select>
-              {selectedEmployeeData && (
-                <div className="flex items-center gap-3">
-                  <Avatar className="w-8 h-8   bg-primary text-sm text-white">
-                          <AvatarFallback className="bg-primary text-white foreground text-xsm font-bold">
-                      {selectedEmployeeData.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold">{selectedEmployeeData.name}</div>
-                    <div className="text-sm text-muted-foreground">{selectedEmployeeData.role}</div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Category Selection */}
