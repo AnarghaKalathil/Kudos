@@ -74,15 +74,15 @@ class Dashboard(APIView):
                         "categories": CategorySerializer(user_categories, many=True).data,
                         "skills": SkillSerializer(user_skills, many=True).data,
                     })
-                    total_users = KudosUser.objects.filter(is_superuser=False).count()
+            total_users = KudosUser.objects.filter(is_superuser=False).count()
 
-                    total_contributors = KudosUser.objects.filter(
-                        recognitions_given__isnull=False
-                    ).distinct().count()
+            total_contributors = KudosUser.objects.filter(
+                recognitions_given__isnull=False
+            ).distinct().count()
 
-                    total_star_count = Star.objects.count()
+            total_star_count = Star.objects.count()
 
-                    total_skill_count = Skills.objects.count()
+            total_skill_count = Skills.objects.count()
 
             return Response({
                 "user_data": {
