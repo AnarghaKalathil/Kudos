@@ -1,6 +1,6 @@
 // src/lib/adminApi.ts
 
-const BASE_URL = 'http://140.245.218.8:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const getToken = () => localStorage.getItem('accessToken');
 
