@@ -407,7 +407,7 @@ class GetuserProfile(APIView):
                 "star_summary": category_counts,
                 "total_stars": total_stars,
                 "recognitions": RecognitionSerializer(user_recognitions, many=True).data,
-                "user_skills":skills
+                "user_skills":SkillSerializer(skills, many=True).data
             })
         except Exception as e:
             return Response(
