@@ -49,7 +49,7 @@ const Index = () => {
         <div className="flex items-center gap-3">
           <h3 className="text-xl font-bold text-foreground tracking-tight justify-start">Kudos</h3>
           <div className="w-10 h-10 bg-gradient-to-tr from-primary to-accent rounded-full flex items-center justify-center shadow">
-            <span className="text-base font-bold text-primary-foreground">JD</span>
+            <span className="text-base font-bold text-primary-foreground">hs</span>
           </div>
         </div>
       </div>
@@ -82,7 +82,7 @@ const Index = () => {
         </nav>
         {/* <div className="flex flex-col items-center mt-auto gap-4 px-6 pt-10">
           <div className="w-10 h-10 bg-gradient-to-tr from-primary to-accent rounded-full flex items-center justify-center shadow">
-            <span className="text-base font-bold text-primary-foreground">JD</span>
+            <span className="text-base font-bold text-primary-foreground">{(profile?.name && profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()) || 'A'}</span>
           </div>
         </div> */}
       </aside>

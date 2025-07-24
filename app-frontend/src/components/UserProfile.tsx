@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star, Award,  TrendingUp } from "lucide-react";
+import { Star, Award, Trophy, Calendar, MessageCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -123,7 +123,7 @@ export const UserProfile = () => {
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
             <Avatar className="w-24 h-24 border-4 border-primary/30 shadow-lg">
               <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-extrabold">
-                JD
+              {(profile?.name && profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()) || (user?.name && user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()) || 'A'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 text-center sm:text-left">
@@ -213,7 +213,6 @@ export const UserProfile = () => {
           </div>
         </TabsContent>
         <TabsContent value="recognitions" className="space-y-6">
-          {/* Sub-tabs for Received/Sent: visually distinct, smaller, subtle */}
           <Tabs defaultValue="received" className="w-full">
             <TabsList className="flex w-full justify-center gap-2 rounded-lg bg-muted/20 mb-4 p-1">
               <TabsTrigger value="received" className="rounded-md px-4 py-1 text-sm font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary bg-white/60 text-muted-foreground transition">Received</TabsTrigger>
