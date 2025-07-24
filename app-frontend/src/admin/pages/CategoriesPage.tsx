@@ -81,7 +81,7 @@ const CategoriesPage: React.FC = () => {
     <div className="w-full">
       <div className="flex flex-row items-center justify-between py-6 px-2">
         <h2 className="text-2xl font-bold text-foreground">Categories</h2>
-        <Button onClick={handleOpen} className="text-lg px-8 py-3 font-bold rounded-lg">Add Category</Button>
+        <Button onClick={handleOpen} className="bg-gradient-to-r from-primary to-accent text-white px-6 py-3 rounded-xl shadow-lg text-lg font-semibold hover:scale-105 transition-transform">Add Category</Button>
       </div>
       <div className="w-full">
         {loading ? (
