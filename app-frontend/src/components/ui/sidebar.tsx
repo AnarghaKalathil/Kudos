@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { getUserProfileAPI } from "@/lib/api";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -109,6 +110,12 @@ const SidebarProvider = React.forwardRef<
       window.addEventListener("keydown", handleKeyDown)
       return () => window.removeEventListener("keydown", handleKeyDown)
     }, [toggleSidebar])
+
+    // Add profile state and fetch in SidebarProvider
+    const [profile, setProfile] = React.useState<any>(null);
+    React.useEffect(() => {
+      getUserProfileAPI().then((data) => setProfile(data));
+    }, []);
 
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.
@@ -248,7 +255,15 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           >
-            <div className="flex flex-col items-center gap-6 mb-10 mt-8">
+            <div className="flex flex-col items-center gap-2 mb-4 mt-8">
+              {profile && (
+                <>
+                  <div className="text-lg font-bold text-foreground">{profile.username}</div>
+                  <div className="text-sm text-muted-foreground font-medium">{profile.designation || profile.role}</div>
+                </>
+              )}
+            </div>
+            <div className="flex flex-col items-center gap-6 mb-10">
               <img src="/Logoone.png" alt="Kudos Logo" className="w-14 h-14 rounded-2xl shadow-md" />
             </div>
             {children}
