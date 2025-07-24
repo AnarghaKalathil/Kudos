@@ -42,7 +42,13 @@ const DataTable: React.FC<Props> = ({ columns, rows, onDelete }) => {
                   </TableCell>
                 ))}
                 <TableCell className={`px-4 py-2 border-b border-border whitespace-nowrap align-middle text-right w-[120px]`}>
-                  <Button variant="destructive" size="lg" className="w-[97px] text-base py-2 font-bold" onClick={() => onDelete(row.id)}>Delete</Button>
+                  <button
+                    type="button"
+                    className="w-[70px] text-sm py-1 font-medium bg-black text-white rounded-md border-none focus:outline-none focus:ring-2 focus:ring-black transition-all duration-150"
+                    onClick={() => onDelete(row.id)}
+                  >
+                    Delete
+                  </button>
                 </TableCell>
               </TableRow>
             ))

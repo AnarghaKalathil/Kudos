@@ -9,6 +9,7 @@ const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<{
@@ -29,7 +30,7 @@ const UsersPage: React.FC = () => {
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const entriesPerPage = 10;
+  const entriesPerPage = 15;
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -74,6 +75,11 @@ const UsersPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    // Frontend check: prevent duplicate email
+    if (!isDeleteConfirm && users.some(u => (u.email || '').toLowerCase() === (formData.email || '').toLowerCase())) {
+      setError('A user with that email already exists.');
+      return;
+    }
     try {
       if (isDeleteConfirm && deleteId !== null) {
         await deleteUser(deleteId);
@@ -86,7 +92,19 @@ const UsersPage: React.FC = () => {
       setDeleteId(null);
       setIsDeleteConfirm(false);
     } catch (err: any) {
-      setError(err.message);
+      // Try to extract and display all error messages from API response
+      let errorMsg = '';
+      if (err && err.response && err.response.data && err.response.data.message) {
+        const msgObj = err.response.data.message;
+        if (typeof msgObj === 'object') {
+          errorMsg = Object.values(msgObj)
+            .flat()
+            .join(' ');
+        } else if (typeof msgObj === 'string') {
+          errorMsg = msgObj;
+        }
+      }
+      setError(errorMsg || err.message || 'An error occurred.');
     }
   };
 
@@ -98,14 +116,32 @@ const UsersPage: React.FC = () => {
     { key: 'designation', label: 'Designation' }
   ];
 
-  const paginatedUsers = users.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
-  const totalPages = Math.ceil(users.length / entriesPerPage);
+  // Filter users by search term
+  const filteredUsers = users.filter(
+    (u) =>
+      (u.username || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.first_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.last_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.designation || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
+  const totalPages = Math.ceil(filteredUsers.length / entriesPerPage);
 
   return (
     <div className="w-full">
       <div className="flex flex-row items-center justify-between py-6 px-2">
         <h2 className="text-2xl font-bold text-foreground">Users</h2>
         <Button onClick={handleOpen} className="bg-gradient-to-r from-primary to-accent text-white px-6 py-3 rounded-xl shadow-lg text-lg font-semibold hover:scale-105 transition-transform">Add User</Button>
+      </div>
+      <div className="flex flex-row items-center justify-end px-2 pb-2">
+        <input
+          type="text"
+          placeholder="Search users..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="mb-2 px-4 py-2 border rounded-lg w-full max-w-xs"
+        />
       </div>
       <div className="w-full">
         {loading ? (
@@ -124,6 +160,7 @@ const UsersPage: React.FC = () => {
           handleSubmit={handleSubmit}
           title={isDeleteConfirm ? 'Delete Confirmation' : 'Add User'}
           isDeleteConfirm={isDeleteConfirm}
+          error={error}
         />
         {error && (
           <div className="text-red-600 text-sm text-center mt-2">{error}</div>

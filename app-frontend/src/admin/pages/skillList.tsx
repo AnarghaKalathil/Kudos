@@ -9,6 +9,7 @@ const SkillsPage: React.FC = () => {
   const [skills, setSkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '' });
@@ -16,10 +17,14 @@ const SkillsPage: React.FC = () => {
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const entriesPerPage = 10;
+  const entriesPerPage = 15;
 
-  const paginatedSkills = skills.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
-  const totalPages = Math.ceil(skills.length / entriesPerPage);
+  // Filter skills by search term
+  const filteredSkills = skills.filter((s) =>
+    s.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const paginatedSkills = filteredSkills.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
+  const totalPages = Math.ceil(filteredSkills.length / entriesPerPage);
 
   const fetchSkills = async () => {
     setLoading(true);
@@ -75,7 +80,7 @@ const SkillsPage: React.FC = () => {
   };
 
   const columns = [
-    { key: 'name', label: 'Skill Name' },
+    { key: 'name', label: 'Skills' },
   ];
 
   return (
@@ -83,6 +88,15 @@ const SkillsPage: React.FC = () => {
       <div className="flex flex-row items-center justify-between py-6 px-2">
         <h2 className="text-2xl font-bold text-foreground">Skills</h2>
         <Button onClick={handleOpen} className="bg-gradient-to-r from-primary to-accent text-white px-6 py-3 rounded-xl shadow-lg text-lg font-semibold hover:scale-105 transition-transform">Add Skill</Button>
+      </div>
+      <div className="flex flex-row items-center justify-end px-2 pb-2">
+        <input
+          type="text"
+          placeholder="Search skills..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="mb-2 px-4 py-2 border rounded-lg w-full max-w-xs"
+        />
       </div>
       <div className="w-full">
         {loading ? (
