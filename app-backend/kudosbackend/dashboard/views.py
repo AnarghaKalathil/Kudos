@@ -12,7 +12,7 @@ from admin_dashboard.models import Skills, Category
 from dashboard import serializer as serializer_obj
 from dashboard.serializer import StatusUpdateSerializer, RecognitionListSerializer, SkillSerializer, \
     RecognitionSerializer
-
+from django.db.models import Prefetch
 
 class Dashboard(APIView):
     permission_classes = [IsAuthenticated, ]
@@ -259,32 +259,57 @@ class TeamList(APIView):
         try:
             users = KudosUser.objects.filter(is_superuser=False)
 
+            # Collect user IDs to filter recognitions/stars in bulk
+            user_ids = users.values_list('id', flat=True)
+
+            # Fetch all recognitions in one go, related to users
+            recognitions = Recognition.objects.filter(receiver_id__in=user_ids).select_related(
+                'category').prefetch_related('skills')
+
+            # Fetch all stars related to those recognitions
+            stars = Star.objects.filter(recognition__receiver_id__in=user_ids).select_related('recognition__category')
+
+            # Group data
+            user_recognitions = defaultdict(list)
+            user_stars = defaultdict(list)
+            user_skills = defaultdict(set)
+
+            for recog in recognitions:
+                user_recognitions[recog.receiver_id].append(recog)
+                if recog.status == RecognitionStatus.APPROVED:
+                    for skill in recog.skills.all():
+                        user_skills[recog.receiver_id].add(skill.id)
+
+            for star in stars:
+                user_stars[star.recognition.receiver_id].append(star)
+
             data = []
 
             for user in users:
-                star_count = Star.objects.filter(
-                    recognition__receiver=user
-                ).count()
+                uid = user.id
+                user_recs = user_recognitions.get(uid, [])
+                approved = [r for r in user_recs if r.status == RecognitionStatus.APPROVED]
+                pending = [r for r in user_recs if r.status == RecognitionStatus.PENDING]
+                rejected = [r for r in user_recs if r.status == RecognitionStatus.REJECTED]
 
-                approved_recognitions = Recognition.objects.filter(
-                    receiver=user,
-                    status=RecognitionStatus.APPROVED
-                )
-                skills = Skills.objects.filter(
-                    recognitions__in=approved_recognitions
-                ).distinct()
+                stars = user_stars.get(uid, [])
+                star_count = len(stars)
 
-                # Recognitions by status
-                pending = Recognition.objects.filter(receiver=user, status=RecognitionStatus.PENDING)
-                approved = approved_recognitions
-                rejected = Recognition.objects.filter(receiver=user, status=RecognitionStatus.REJECTED)
+                category_counts = defaultdict(int)
+                for star in stars:
+                    category_name = star.recognition.category.name
+                    category_counts[category_name] += 1
+
+                skill_ids = list(user_skills.get(uid, []))
+                skills = Skills.objects.filter(id__in=skill_ids)
 
                 data.append({
                     "user_id": user.id,
                     "name": user.get_full_name() if hasattr(user, "get_full_name") else user.username,
                     "email": user.email,
-                    "designation":user.designation,
+                    "designation": user.designation,
                     "star_count": star_count,
+                    "star_summary": category_counts,
                     "skills": SkillSerializer(skills, many=True).data,
                     "recognitions": {
                         "pending": RecognitionSerializer(pending, many=True).data,
