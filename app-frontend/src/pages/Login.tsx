@@ -50,7 +50,7 @@ const Login = () => {
           description: response.message || "Welcome back to Kudos",
         });
         if (response.data.user_data.is_superuser) {
-          window.location.href = "/admin";
+          window.location.href = "/admin-dashboard";
         } else {
           window.location.href = "/dashboard";
         }
