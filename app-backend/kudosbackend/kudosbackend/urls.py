@@ -24,7 +24,7 @@ urlpatterns = [
     path("api/admin/", admin.site.urls),
     path("api/accounts/", include("accounts.urls")),
     path("api/dashboard/", include("dashboard.urls")),
-    path("admin-dashboard/", include("admin_dashboard.urls")),
+    path("api/admin-dashboard/", include("admin_dashboard.urls")),
 ]
 
 if settings.DEBUG:
