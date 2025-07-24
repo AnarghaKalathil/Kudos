@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { getAllUsers, createUser, deleteUser } from '@/lib/adminApi';
 import Pagination from "@/components/Pagination";
 
 const UsersPage: React.FC = () => {
+  const { toast } = useToast();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,6 +89,10 @@ const UsersPage: React.FC = () => {
       } else {
         const newUser = await createUser(formData);
         setUsers((prev) => [newUser, ...prev]);
+        toast({
+          title: 'User added successfully!',
+          variant: 'default',
+        });
       }
       setOpen(false);
       setDeleteId(null);

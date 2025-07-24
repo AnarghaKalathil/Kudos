@@ -4,10 +4,12 @@ import React, { useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { getAllCategories, createCategory, deleteCategory } from '@/lib/adminApi';
 import Pagination from "@/components/Pagination";
 
 const CategoriesPage: React.FC = () => {
+  const { toast } = useToast();
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +64,10 @@ const CategoriesPage: React.FC = () => {
       } else {
         const newCategory = await createCategory(formData);
         setCategories((prev) => [newCategory, ...prev]);
+        toast({
+          title: 'Category added successfully!',
+          variant: 'default',
+        });
       }
       setOpen(false);
       setDeleteId(null);

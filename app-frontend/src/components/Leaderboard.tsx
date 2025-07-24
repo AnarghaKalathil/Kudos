@@ -22,8 +22,9 @@ interface Recognition {
   date: string;
   message: string;
   tags: string[];
-  status: "pending" | "approved" | "rejected";
+  status: string;
   backendId: number; // Added for backend ID
+  reviewer?: string; // Added for reviewer
 }
 
 const categoryColors: Record<string, string> = {
@@ -36,7 +37,7 @@ type ActionType = "accept" | "reject" | "moveToAccepted" | null;
 
 export default function RecognitionTabs() {
   const [recognitions, setRecognitions] = useState<Recognition[]>([]);
-  const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected">("pending");
+  const [activeTab, setActiveTab] = useState<string>("pending");
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -60,6 +61,7 @@ export default function RecognitionTabs() {
           message: item.message || '',
           tags: Array.isArray(item.skills) ? item.skills : [],
           status: (item.status || '').toLowerCase(),
+          reviewer: item.reviewer || undefined, // Add reviewer field
         }));
         setRecognitions(mapped);
       }
@@ -102,6 +104,11 @@ export default function RecognitionTabs() {
     setActionType(null);
   };
 
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const approvedRecognitions = recognitions.filter(
+    (r) => r.status === 'approved' && r.reviewer && r.reviewer.toLowerCase() === user.username?.toLowerCase()
+  );
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-start bg-gray-50 p-6 mt-8">
       <Card className="w-full flex-1 flex flex-col">
@@ -112,24 +119,105 @@ export default function RecognitionTabs() {
 
         <Tabs
           value={activeTab}
-          onValueChange={(val) => setActiveTab(val as Recognition["status"])}
+          onValueChange={(val) => setActiveTab(val)}
           className="flex flex-col flex-1"
         >
           <TabsList className="grid grid-cols-3 p-4 gap-2 h-16">
             <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="accepted">Approved</TabsTrigger>
+            <TabsTrigger value="approved">Approved</TabsTrigger>
             <TabsTrigger value="rejected">Declined</TabsTrigger>
           </TabsList>
 
-          {["pending", "accepted", "rejected"].map((status) => (
+          {["pending", "approved", "rejected"].map((status) => (
             <TabsContent key={status} value={status} className="p-4 flex-1 overflow-auto">
-              {recognitions.filter((r) => r.status === status).length === 0 ? (
-                <p className="text-muted-foreground text-sm">No {status} recognitions.</p>
-              ) : (
+              {status === "pending" && (
                 <div className="space-y-4">
-                  {recognitions
-                    .filter((r) => r.status === status)
-                    .map((recognition) => (
+                  {recognitions.filter((r) => r.status === status).length === 0 ? (
+                    <p className="text-muted-foreground text-sm">No {status} recognitions.</p>
+                  ) : (
+                    recognitions
+                      .filter((r) => r.status === status)
+                      .map((recognition) => (
+                        <Card key={recognition.id} className="shadow-medium">
+                          <CardContent className="pt-6">
+                            <div className="flex items-start gap-3">
+                              <Avatar>
+                                <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                                  {recognition.from[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="font-medium">{recognition.from}</span>
+                                  <Badge
+                                    variant="secondary"
+                                    className={`text-xs ${
+                                      categoryColors[recognition.category] || "bg-gray-100 text-gray-800"
+                                    }`}
+                                  >
+                                    {recognition.category}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">• {recognition.date}</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mb-1">
+                                  recognized <span className="font-bold text-success text-md">{recognition.to}</span> for{" "}
+                                  <strong className="text-warning text-md">{recognition.skill}</strong>
+                                </p>
+                                <p className="text-sm mb-3 italic">“{recognition.message}”</p>
+                                <div className="flex gap-1 flex-wrap">
+                                  {recognition.tags.map((tag, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              <Star className="w-5 h-5 text-yellow-400" />
+                            </div>
+
+                            {status === "pending" && (
+                              <div className="flex justify-end gap-2 pt-4">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openConfirmation(recognition, "accept")}
+                                >
+                                  Approve
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => openConfirmation(recognition, "reject")}
+                                >
+                                  Decline
+                                </Button>
+                              </div>
+                            )}
+
+                            {status === "rejected" && (
+                              <div className="flex justify-end pt-4">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openConfirmation(recognition, "moveToAccepted")}
+                                >
+                                  Move to Approved
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))
+                  )}
+                </div>
+              )}
+
+              {status === "approved" && (
+                <div className="space-y-4">
+                  {approvedRecognitions.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">No approved recognitions.</p>
+                  ) : (
+                    approvedRecognitions.map((recognition) => (
                       <Card key={recognition.id} className="shadow-medium">
                         <CardContent className="pt-6">
                           <div className="flex items-start gap-3">
@@ -143,9 +231,7 @@ export default function RecognitionTabs() {
                                 <span className="font-medium">{recognition.from}</span>
                                 <Badge
                                   variant="secondary"
-                                  className={`text-xs ${
-                                    categoryColors[recognition.category] || "bg-gray-100 text-gray-800"
-                                  }`}
+                                  className={`text-xs ${categoryColors[recognition.category] || "bg-gray-100 text-gray-800"}`}
                                 >
                                   {recognition.category}
                                 </Badge>
@@ -166,27 +252,55 @@ export default function RecognitionTabs() {
                             </div>
                             <Star className="w-5 h-5 text-yellow-400" />
                           </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              )}
 
-                          {status === "pending" && (
-                            <div className="flex justify-end gap-2 pt-4">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => openConfirmation(recognition, "accept")}
-                              >
-                                Approve
-                              </Button>
-                              <Button 
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => openConfirmation(recognition, "reject")}
-                              >
-                                Decline
-                              </Button>
+              {status === "rejected" && (
+                <div className="space-y-4">
+                  {recognitions.filter((r) => r.status === "rejected").length === 0 ? (
+                    <p className="text-muted-foreground text-sm">No rejected recognitions.</p>
+                  ) : (
+                    recognitions
+                      .filter((r) => r.status === "rejected")
+                      .map((recognition) => (
+                        <Card key={recognition.id} className="shadow-medium">
+                          <CardContent className="pt-6">
+                            <div className="flex items-start gap-3">
+                              <Avatar>
+                                <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                                  {recognition.from[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="font-medium">{recognition.from}</span>
+                                  <Badge
+                                    variant="secondary"
+                                    className={`text-xs ${categoryColors[recognition.category] || "bg-gray-100 text-gray-800"}`}
+                                  >
+                                    {recognition.category}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">• {recognition.date}</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mb-1">
+                                  recognized <span className="font-bold text-success text-md">{recognition.to}</span> for{" "}
+                                  <strong className="text-warning text-md">{recognition.skill}</strong>
+                                </p>
+                                <p className="text-sm mb-3 italic">“{recognition.message}”</p>
+                                <div className="flex gap-1 flex-wrap">
+                                  {recognition.tags.map((tag, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              <Star className="w-5 h-5 text-yellow-400" />
                             </div>
-                          )}
-
-                          {status === "rejected" && (
                             <div className="flex justify-end pt-4">
                               <Button
                                 size="sm"
@@ -196,10 +310,10 @@ export default function RecognitionTabs() {
                                 Move to Approved
                               </Button>
                             </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
+                          </CardContent>
+                        </Card>
+                      ))
+                  )}
                 </div>
               )}
             </TabsContent>

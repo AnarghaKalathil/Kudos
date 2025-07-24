@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { getAllSkills, createSkill, deleteSkill } from '@/lib/adminApi';
 import Pagination from "@/components/Pagination";
 
 const SkillsPage: React.FC = () => {
+  const { toast } = useToast();
   const [skills, setSkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +72,10 @@ const SkillsPage: React.FC = () => {
       } else {
         const newSkill = await createSkill({ name: formData.name });
         setSkills((prev) => [...prev, newSkill]);
+        toast({
+          title: 'Skill added successfully!',
+          variant: 'default',
+        });
       }
       setOpen(false);
       setDeleteId(null);
