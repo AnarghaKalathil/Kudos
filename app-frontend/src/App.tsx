@@ -17,7 +17,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/dashboard/*" element={<UnifiedDashboard />} />
-          <Route path="/admin/*" element={<UnifiedDashboard />} />
+          <Route path="/admin-dashboard/*" element={<UnifiedDashboard />} />
           <Route path="/" element={<Login />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
