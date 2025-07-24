@@ -397,12 +397,17 @@ class GetuserProfile(APIView):
             user_recognitions = Recognition.objects.filter(
                 Q(receiver=user) | Q(sender=user)
             )
+            skills = Skills.objects.filter(
+                recognitions__receiver=user,
+                recognitions__status=RecognitionStatus.APPROVED
+            ).distinct()
             return Response({
                 "user_id": user.id,
                 "name": user.get_full_name() if hasattr(user, "get_full_name") else user.username,
                 "star_summary": category_counts,
                 "total_stars": total_stars,
                 "recognitions": RecognitionSerializer(user_recognitions, many=True).data,
+                "user_skills":skills
             })
         except Exception as e:
             return Response(
