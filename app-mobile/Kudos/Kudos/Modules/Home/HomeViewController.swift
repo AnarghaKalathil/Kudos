@@ -7,11 +7,14 @@
 
 import UIKit
 
+
 class HomeViewController: UIViewController {
     //Nav Bar
     @IBOutlet weak var navBar: UIView!
     @IBOutlet weak var imgLogo: UIImageView!
+    @IBOutlet weak var lblPendingReqCount: UILabel!
     
+    @IBOutlet weak var bg: UIImageView!
     //Welcome View
     @IBOutlet weak var viewWelcome: UIView!
     @IBOutlet weak var viewWeolcomeHeightConstraint: NSLayoutConstraint!
@@ -27,7 +30,7 @@ class HomeViewController: UIViewController {
     //Variables
     var tabBtnTag = 0
     
-    
+    var allRecognitions: HomeModels.AllRecognitions?
     //Static data
     let topRecepientsArr: [HomeModels.UserModel] = [
         HomeModels.UserModel(
@@ -66,6 +69,8 @@ class HomeViewController: UIViewController {
             skillTags: ["Docker", "Kubernetes"]
         )
     ]
+    
+    var topRecepientsArrApi = [HomeModels.TopUser]()
 
     let topGiversArr: [HomeModels.UserModel] = [
         HomeModels.UserModel(
@@ -104,24 +109,105 @@ class HomeViewController: UIViewController {
             skillTags: ["Python", "TypeScript"]
         )
     ]
-
+    var dashboardData: HomeModels.DashboardResponse?
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.setupView()
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        AppAccess.shared.loadUserData()
+        self.getDashboardData()
+    }
+    func getSkillData() {
+        Loader.shared.show(on: self.view)
+        performSkillsApi { success, response in
+            if success {
+                if let data = response  {
+                    AppAccess.shared.saveSkillsData(data)
+                }
+                print(response)
+                self.getCategoryData()
+            } else {
+                print("Skills failed.")
+                Loader.shared.hide()
+            }
+
+        }
+    }
+    func getCategoryData() {
+       Loader.shared.show(on: self.view)
+        performCategoriesApi { success, response in
+            if success {
+                if let data = response  {
+                    AppAccess.shared.saveCategoryData(data)
+                }
+                print(response)
+                self.getAllRecData()
+                Loader.shared.hide()
+            } else {
+                print("Categories failed.")
+                Loader.shared.hide()
+            }
+
+        }
+    }
+    func getAllRecData() {
+        Loader.shared.show(on: self.view)
+        performGetAllRecognitionApi { success, response in
+            if success {
+                if let data = response  {
+                    self.allRecognitions = data
+                }
+                print(response)
+                self.setupView()
+                Loader.shared.hide()
+            } else {
+                print("Recognitions failed.")
+                Loader.shared.hide()
+            }
+
+        }
+    }
+    func getDashboardData(){
+       Loader.shared.show(on: self.view)
+        performDashboardApi() { success, response in
+            if success {
+                self.dashboardData = response
+                print(self.dashboardData)
+                self.getSkillData()
+                Loader.shared.hide()
+            } else {
+                print("Dashboard failed.")
+                Loader.shared.hide()
+            }
+        }
     }
     //Setup view
     func setupView() {
         //Nav Bar
         self.imgLogo.layer.cornerRadius = 4
         self.navBar.applyShadow()
-        
+       // self.navBar.backgroundColor = UIColor(hex: "#48C7BA", alpha: 1)
         //Welcome View
         self.viewWelcome.layer.cornerRadius = 4
         self.btnReviewReq.layer.cornerRadius = 4
-        
+        self.bg.layer.cornerRadius = 4
+        self.bg.clipsToBounds = true
+        //Logo shadow
+        self.imgLogo.layer.shadowColor = UIColor.black.cgColor
+        self.imgLogo.layer.shadowOpacity = 0.5
+        self.imgLogo.layer.shadowOffset = CGSize(width: 0, height: 2)
+        self.imgLogo.layer.shadowRadius = 4
+        self.imgLogo.layer.masksToBounds = false // Important!
+
         self.tabView.applyShadow()
+        self.lblPemdingReq.text = "You have \(self.allRecognitions?.data.count ?? 0) pending recognition requests to review."
         
+        AppAccess.shared.loadUserData()
+        let user = AppAccess.shared.user
+        self.lblWelcome.text = "Hi \(user?.username ?? "")"
+        self.topRecepientsArrApi = self.dashboardData?.top_users ?? []
         //Collectionview
         let nibName = UINib(nibName: CellNibName.leaderboardCollectionViewCell.rawValue, bundle: nil)
         self.leaderboardCollectionView.register(nibName, forCellWithReuseIdentifier: CellNibName.leaderboardCollectionViewCell.rawValue)
@@ -149,6 +235,7 @@ class HomeViewController: UIViewController {
     @IBAction func onTapReviewReq(_ sender: UIButton) {
         let vc = UIStoryboard.init(name: "Main", bundle: Bundle.main)
             .instantiateViewController(withIdentifier: NibName.requestsViewController.rawValue) as? RequestsViewController
+        vc?.requsetArrApi = self.allRecognitions?.data ?? []
         self.navigationController?.pushViewController(vc!, animated: true)
     }
     
@@ -179,15 +266,15 @@ class HomeViewController: UIViewController {
 
 extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return tabBtnTag == 0 ? topRecepientsArr.count : topGiversArr.count
+        return tabBtnTag == 0 ? topRecepientsArrApi.count : topGiversArr.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellNibName.leaderboardCollectionViewCell.rawValue, for: indexPath) as! LeaderboardCollectionViewCell
         if tabBtnTag == 0 {
-            cell.setupView(data: topRecepientsArr[indexPath.item])
+            cell.setupView(data: topRecepientsArrApi[indexPath.item])
         } else {
-            cell.setupView(data: topGiversArr[indexPath.item])
+           // cell.setupView(data: topGiversArr[indexPath.item])
         }
         return cell
     }

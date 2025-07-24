@@ -19,6 +19,8 @@ class TagsCollectionViewCell: UICollectionViewCell {
         if isFromHome {
             self.lblTagName.text = self.getInitials(from: skillTag)
             self.cellView.layer.cornerRadius = self.lblTagName.frame.size.height/2
+            self.lblTagName.layer.cornerRadius = self.lblTagName.frame.size.height/2
+            self.lblTagName.clipsToBounds = true
             self.cellView.backgroundColor = .white
         } else {
             self.lblTagName.text = skillTag

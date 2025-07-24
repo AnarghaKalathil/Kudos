@@ -7,6 +7,7 @@
 
 import UIKit
 
+
 class RequestsViewController: UIViewController {
     
     @IBOutlet weak var navBar: UIView!
@@ -16,7 +17,7 @@ class RequestsViewController: UIViewController {
     @IBOutlet weak var btnNewReq: UIButton!
     @IBOutlet weak var btnClosedReq: UIButton!
     
-    
+    var requsetArrApi = [HomeModels.RecognitionItem]()
     //Static Data
     let requestArr: [RequestModels.ReqModel] = [
         RequestModels.ReqModel(fromName: "Alice Johnson", forName: "Bob Anderson", category: "Leadership", dept: "Engineering", commects: "Great guidance on the new project launch!", tag: "Team Leadership", date: "2025-07-01", status: "Approved"),
@@ -33,6 +34,8 @@ class RequestsViewController: UIViewController {
     
     var newRequests = [RequestModels.ReqModel]()
     var closedRequests = [RequestModels.ReqModel]()
+    var newRequestsApi = [HomeModels.RecognitionItem]()
+    var closedRequestsApi = [HomeModels.RecognitionItem]()
     var btnTag = 0
     
     override func viewDidLoad() {
@@ -40,15 +43,15 @@ class RequestsViewController: UIViewController {
         self.setupView()
         // Do any additional setup after loading the view.
     }
-    
     func setupView() {
         //Nav bar
         self.navBar.applyShadow()
         
         self.tabView.applyShadow()
         
+        self.btnNewReq.backgroundColor = UIColor(hex: "#6554EF", alpha: 0.68)
         //Collectionview
-        self.newRequests = self.requestArr.filter { $0.status?.lowercased() == "pending" }
+        self.newRequestsApi = self.requsetArrApi.filter { $0.status?.lowercased() == "pending" }
         let nibName = UINib(nibName: CellNibName.requestsCollectionViewCell.rawValue, bundle: nil)
         self.requestCollectionView.register(nibName, forCellWithReuseIdentifier: CellNibName.requestsCollectionViewCell.rawValue)
         self.requestCollectionView.delegate = self
@@ -58,6 +61,23 @@ class RequestsViewController: UIViewController {
         collectionLayout.minimumInteritemSpacing = 2
         self.requestCollectionView.collectionViewLayout = collectionLayout
 
+    }
+    func getAllRecData() {
+        Loader.shared.show(on: self.view)
+        performGetAllRecognitionApi { success, response in
+            if success {
+                if let recData = response  {
+                    self.requsetArrApi = recData.data
+                }
+                print(response)
+                self.setupView()
+                Loader.shared.hide()
+            } else {
+                print("Recognitions failed.")
+                Loader.shared.hide()
+            }
+
+        }
     }
 
     /*
@@ -75,19 +95,23 @@ class RequestsViewController: UIViewController {
     
     @IBAction func onTapTab(_ sender: UIButton) {
         self.btnTag = sender.tag
-        self.newRequests = self.requestArr.filter { $0.status?.lowercased() == "pending" }
-
-        self.closedRequests = self.requestArr.filter {
+       // self.newRequests = self.requestArr.filter { $0.status?.lowercased() == "pending" }
+        self.newRequestsApi = self.requsetArrApi.filter { $0.status?.lowercased() == "pending" }
+//        self.closedRequests = self.requestArr.filter {
+//            let status = $0.status?.lowercased()
+//            return status == "approved" || status == "rejected"
+//        }
+        self.closedRequestsApi = self.requsetArrApi.filter {
             let status = $0.status?.lowercased()
-            return status == "approved" || status == "rejected"
+            return status == "accepted" || status == "rejected"
         }
 
         self.requestCollectionView.reloadData()
         if btnTag == 0 {
-            self.btnNewReq.backgroundColor = UIColor(hex: "#DD5426", alpha: 0.68)
+            self.btnNewReq.backgroundColor = UIColor(hex: "#6554EF", alpha: 0.68)
             self.btnClosedReq.backgroundColor = UIColor.white
         } else {
-            self.btnClosedReq.backgroundColor = UIColor(hex: "#DD5426", alpha: 0.68)
+            self.btnClosedReq.backgroundColor = UIColor(hex: "#6554EF", alpha: 0.68)
             self.btnNewReq.backgroundColor = UIColor.white
         }
     }
@@ -95,12 +119,12 @@ class RequestsViewController: UIViewController {
 
 extension RequestsViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return btnTag == 0 ? self.newRequests.count  : self.closedRequests.count
+        return btnTag == 0 ? self.newRequestsApi.count  : self.closedRequestsApi.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellNibName.requestsCollectionViewCell.rawValue, for: indexPath) as! RequestsCollectionViewCell
-        cell.reqData = btnTag == 0 ? self.newRequests[indexPath.item]  : self.closedRequests[indexPath.item]
+        cell.reqDataApi = btnTag == 0 ? self.newRequestsApi[indexPath.item]  : self.closedRequestsApi[indexPath.item]
         cell.setupView()
         return cell
     }
@@ -108,8 +132,11 @@ extension RequestsViewController: UICollectionViewDelegate, UICollectionViewData
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let vc = UIStoryboard.init(name: "Main", bundle: Bundle.main)
             .instantiateViewController(withIdentifier: NibName.requestDetailViewController.rawValue) as? RequestDetailViewController
-        vc?.reqData = btnTag == 0 ? self.newRequests[indexPath.item]  : self.closedRequests[indexPath.item]
+        vc?.reqDataApi = btnTag == 0 ? self.newRequestsApi[indexPath.item]  : self.closedRequestsApi[indexPath.item]
         vc?.isClosed = btnTag == 0 ? false : true
+        vc?.didDismissView = { [weak self] () in
+            self?.getAllRecData()
+        }
         self.navigationController?.present(vc!, animated: true)
     }
     

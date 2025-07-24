@@ -26,3 +26,18 @@ enum CellNibName: String {
     case categoriesCollectionViewCell = "CategoriesCollectionViewCell"
     case notificationsCollectionViewCell = "NotificationsCollectionViewCell"
 }
+
+enum BaseUrl : String {
+    case BASE_URL = "http://140.245.218.8/api/"
+}
+
+enum ApiEndPoints : String {
+    case login = "accounts/api/login/"
+    case dashboard = "dashboard/api/dashboard/"
+    case skills = "admin-dashboard/api/skills/"
+    case people = "dashboard/api/teams/"
+    case category = "admin-dashboard/api/categories/"
+    case addRecognition = "dashboard/api/recognition/"
+    case profile = "dashboard/api/profile"
+    case recognitionStatus = "dashboard/api/recognition/status"
+}

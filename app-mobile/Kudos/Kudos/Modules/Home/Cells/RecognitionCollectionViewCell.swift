@@ -11,12 +11,16 @@ class RecognitionCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var cellView: UIView!
     @IBOutlet weak var lblIcon: UILabel!
     @IBOutlet weak var lblName: UILabel!
+    @IBOutlet weak var bg: UIImageView!
     
     func setupView(name: String) {
         self.cellView.applyShadow()
         self.lblIcon.text = self.getInitials(from: name)
         self.lblIcon.layer.cornerRadius = self.lblIcon.frame.height/2
         self.lblIcon.clipsToBounds = true
+        self.bg.layer.cornerRadius = self.lblIcon.frame.height/2
+        self.bg.clipsToBounds = true
+
         self.lblName.text = name
     }
     func getInitials(from name: String) -> String {

@@ -3,7 +3,6 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
-        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -21,9 +20,12 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TPd-To-2SE">
                         <rect key="frame" x="0.0" y="0.0" width="319" height="61"/>
                         <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="background" translatesAutoresizingMaskIntoConstraints="NO" id="EIL-sg-4kp">
+                                <rect key="frame" x="10" y="8" width="45" height="45"/>
+                            </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PGr-1v-CH9">
                                 <rect key="frame" x="10" y="8" width="45" height="45"/>
-                                <color key="backgroundColor" name="AppColor"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="45" id="Vtl-gm-VvC"/>
                                     <constraint firstAttribute="width" constant="45" id="fFh-SD-j0v"/>
@@ -44,11 +46,15 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="EIL-sg-4kp" firstAttribute="centerY" secondItem="PGr-1v-CH9" secondAttribute="centerY" id="1RZ-2c-iSg"/>
                             <constraint firstItem="Fnb-Ze-8TZ" firstAttribute="centerY" secondItem="TPd-To-2SE" secondAttribute="centerY" id="6fH-5o-Hb9"/>
                             <constraint firstItem="PGr-1v-CH9" firstAttribute="centerY" secondItem="TPd-To-2SE" secondAttribute="centerY" id="FrQ-UL-O6i"/>
+                            <constraint firstItem="EIL-sg-4kp" firstAttribute="centerX" secondItem="PGr-1v-CH9" secondAttribute="centerX" id="Hbn-b2-IvO"/>
                             <constraint firstItem="Fnb-Ze-8TZ" firstAttribute="leading" secondItem="PGr-1v-CH9" secondAttribute="trailing" constant="10" id="JTE-LB-EyG"/>
+                            <constraint firstItem="EIL-sg-4kp" firstAttribute="top" secondItem="PGr-1v-CH9" secondAttribute="top" id="iq5-jg-mby"/>
                             <constraint firstAttribute="trailing" secondItem="Fnb-Ze-8TZ" secondAttribute="trailing" constant="10" id="q5h-bc-nCK"/>
                             <constraint firstItem="PGr-1v-CH9" firstAttribute="leading" secondItem="TPd-To-2SE" secondAttribute="leading" constant="10" id="six-VI-PXm"/>
+                            <constraint firstItem="EIL-sg-4kp" firstAttribute="leading" secondItem="PGr-1v-CH9" secondAttribute="leading" id="xTY-B6-rRj"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -61,6 +67,7 @@
             </collectionViewCellContentView>
             <size key="customSize" width="319" height="61"/>
             <connections>
+                <outlet property="bg" destination="EIL-sg-4kp" id="WTT-A1-sVF"/>
                 <outlet property="cellView" destination="TPd-To-2SE" id="hRe-iB-ap4"/>
                 <outlet property="lblIcon" destination="PGr-1v-CH9" id="CDm-83-lKe"/>
                 <outlet property="lblName" destination="Fnb-Ze-8TZ" id="99Y-59-9A8"/>
@@ -69,9 +76,7 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <namedColor name="AppColor">
-            <color red="0.8666666666666667" green="0.32941176470588235" blue="0.14901960784313725" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
+        <image name="background" width="5008" height="1456"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

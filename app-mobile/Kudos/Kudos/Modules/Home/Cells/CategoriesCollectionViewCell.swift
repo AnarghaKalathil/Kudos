@@ -14,12 +14,14 @@ class CategoriesCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var lblCategory: UILabel!
     @IBOutlet weak var recognitionCollectionView: UICollectionView!
     var data: HomeModels.CategoryModel?
+    var dataApi: CategoryModel.UserCategory?
     var isFromPeople = false
     func setupView() {
         self.cellView.applyShadow()
         
-        self.lblCategory.text = data?.name ?? ""
-        self.lblStarCount.text = "\(data?.starCount ?? 0)"
+        self.lblCategory.text = dataApi?.name ?? ""
+       // self.lblStarCount.text = "\(dataApi?.starCount ?? 0)"
+        self.lblStarCount.text = "\(dataApi?.count ?? 0)"
         self.recognitionCollectionView.isHidden = isFromPeople ? true : false
         //Collectionview
         if !isFromPeople {
@@ -37,12 +39,12 @@ class CategoriesCollectionViewCell: UICollectionViewCell {
 
 extension CategoriesCollectionViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.data?.recognizedBy.count ?? 0
+        return self.dataApi?.senders.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellNibName.recognitionCollectionViewCell.rawValue, for: indexPath) as! RecognitionCollectionViewCell
-        cell.setupView(name: self.data?.recognizedBy[indexPath.item] ?? "")
+        cell.setupView(name: self.dataApi?.senders[indexPath.item] ?? "")
         return cell
     }
         

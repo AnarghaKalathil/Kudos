@@ -10,17 +10,17 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="TagsCollectionViewCell" id="d3J-dj-hpD" customClass="TagsCollectionViewCell" customModule="Kudos" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="147" height="64"/>
+            <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="SKz-QJ-cJT">
-                <rect key="frame" x="0.0" y="0.0" width="147" height="64"/>
+                <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5n7-rv-Zba">
-                        <rect key="frame" x="0.0" y="0.0" width="147" height="64"/>
+                        <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="adW-0P-mzF">
-                                <rect key="frame" x="10" y="10" width="127" height="44"/>
+                                <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -28,9 +28,9 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.29824990784095612" colorSpace="custom" customColorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="adW-0P-mzF" firstAttribute="top" secondItem="5n7-rv-Zba" secondAttribute="top" constant="10" id="d9o-Gt-wQJ"/>
+                            <constraint firstItem="adW-0P-mzF" firstAttribute="top" secondItem="5n7-rv-Zba" secondAttribute="top" id="d9o-Gt-wQJ"/>
                             <constraint firstItem="adW-0P-mzF" firstAttribute="centerX" secondItem="5n7-rv-Zba" secondAttribute="centerX" id="jph-Z7-Kf1"/>
-                            <constraint firstItem="adW-0P-mzF" firstAttribute="leading" secondItem="5n7-rv-Zba" secondAttribute="leading" constant="10" id="pbh-BH-7er"/>
+                            <constraint firstItem="adW-0P-mzF" firstAttribute="leading" secondItem="5n7-rv-Zba" secondAttribute="leading" id="pbh-BH-7er"/>
                             <constraint firstItem="adW-0P-mzF" firstAttribute="centerY" secondItem="5n7-rv-Zba" secondAttribute="centerY" id="vfE-yj-VpX"/>
                         </constraints>
                     </view>

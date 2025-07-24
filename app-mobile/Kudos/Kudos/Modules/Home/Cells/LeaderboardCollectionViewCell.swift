@@ -11,18 +11,20 @@ class LeaderboardCollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var lblIcon: UILabel!
     @IBOutlet weak var lblName: UILabel!
-    @IBOutlet weak var lblCategory: UILabel!
     @IBOutlet weak var lblStarCount: UILabel!
+    @IBOutlet weak var bg: UIImageView!
     @IBOutlet weak var cellView: UIView!
     
-    func setupView(data: HomeModels.UserModel) {
+    func setupView(data: HomeModels.TopUser) {
         self.cellView.applyShadow()
-        self.lblIcon.text = self.getInitials(from: data.name ?? "")
+        self.lblIcon.text = self.getInitials(from: ((data.first_name ?? "") + " " + (data.last_name ?? "")))
         self.lblIcon.layer.cornerRadius = self.lblIcon.frame.height/2
         self.lblIcon.clipsToBounds = true
-        self.lblName.text = data.name
-        self.lblCategory.text = data.category[0].name
-        self.lblStarCount.text = "\(data.starCount ?? 0)"
+        self.bg.layer.cornerRadius = self.lblIcon.frame.height/2
+        self.bg.clipsToBounds = true
+
+        self.lblName.text = ((data.first_name ?? "") + " " + (data.last_name ?? ""))
+        self.lblStarCount.text = "\(data.star_count ?? 0)"
     }
     
     func getInitials(from name: String) -> String {

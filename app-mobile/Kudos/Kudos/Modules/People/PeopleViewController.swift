@@ -7,6 +7,7 @@
 
 import UIKit
 
+
 class PeopleViewController: UIViewController {
     
     //Nav Bar
@@ -21,7 +22,8 @@ class PeopleViewController: UIViewController {
     var isFromRecognition = false
     var isTagSearch = false
     var selectedUser: HomeModels.UserModel?
-    var didTapUser:((HomeModels.UserModel) -> Void)?
+    var selectedUserApi: PeopleModel.Recognitions?
+    var didTapUser:((PeopleModel.Recognitions) -> Void)?
     //Static Data
     var peopleArr: [HomeModels.UserModel] = [
         HomeModels.UserModel(
@@ -95,15 +97,32 @@ class PeopleViewController: UIViewController {
             skillTags: ["Python", "Kubernetes"]
         )
     ]
-
+    var peopleData: PeopleModel.PeopleResponse?
     var filteredPeopleArr = [HomeModels.UserModel]()
-    
+    var filteredPeopleArrApi = [PeopleModel.Recognitions]()
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.setupView()
         // Do any additional setup after loading the view.
     }
-    
+    override func viewWillAppear(_ animated: Bool) {
+        AppAccess.shared.loadSkillsData()
+        AppAccess.shared.loadUserData()
+        self.getPeopleData()
+    }
+    func getPeopleData() {
+        Loader.shared.show(on: self.view)
+        performPeopleApi() { success, response in
+            if success {
+                self.peopleData = response
+                print(self.peopleData)
+                self.setupView()
+                Loader.shared.hide()
+            } else {
+                print("People failed.")
+                Loader.shared.hide()
+            }
+        }
+    }
     //Setup view
     func setupView() {
         //Nav Bar
@@ -118,16 +137,25 @@ class PeopleViewController: UIViewController {
         //Reviewer
         if isFromRecognition {
             if !self.isTagSearch {
-                if let data = selectedUser {
-                    self.peopleArr = peopleArr.filter { $0.name != data.name }
+                if let selData = selectedUserApi {
+                   // self.peopleArr = peopleArr.filter { $0.name != data.name }
+                    if let data = peopleData?.data {
+                        self.peopleData?.data = data.filter { $0.userId != selData.userId}
+                    }
+                }
+                if let data = peopleData?.data {
+                    self.peopleData?.data = data.filter {$0.userId != (AppAccess.shared.user?.userId ?? 0)}
                 }
             }
         }
         
-        self.filteredPeopleArr = self.peopleArr
+       // self.filteredPeopleArr = self.peopleArr
+        self.filteredPeopleArrApi = self.peopleData?.data ?? []
+       
+        
         self.txtSearch.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         if self.isTagSearch {
-            self.txtSearch.placeholder = "Search tags"
+            self.txtSearch.placeholder = "Search skills"
         }
 
         //Collectionview
@@ -141,14 +169,14 @@ class PeopleViewController: UIViewController {
         self.peopleCollectionView.collectionViewLayout = collectionLayout
         
     }
-    func filterPeople(by searchText: String) -> [HomeModels.UserModel] {
-        guard !searchText.isEmpty else { return peopleArr }
+    func filterPeople(by searchText: String) -> [PeopleModel.Recognitions] {
+        guard !searchText.isEmpty else { return peopleData?.data ?? [] }
 
         let lowercasedSearch = searchText.lowercased()
 
-        return self.filteredPeopleArr.filter { user in
-            user.skillTags.contains { tag in
-                tag.lowercased().contains(lowercasedSearch)
+        return self.filteredPeopleArrApi.filter { user in
+            user.skills.contains { tag in
+                (tag.name ?? "").lowercased().contains(lowercasedSearch)
             }
         }
     }
@@ -157,25 +185,41 @@ class PeopleViewController: UIViewController {
         if self.isTagSearch {
             guard let searchText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines), searchText.count >= 2 else {
                 // If less than 2 characters, show full sorted list
-                self.filteredPeopleArr = self.peopleArr.sorted { ($0.name ?? "") < ($1.name ?? "") }
+                if let data = self.peopleData?.data {
+                    self.filteredPeopleArrApi = data.sorted { ($0.name ?? "") < ($1.name ?? "") }
+                }
                 self.peopleCollectionView.reloadData()
                 return
             }
-            self.filteredPeopleArr = self.filterPeople(by: searchText)
-
+            self.filteredPeopleArrApi = self.filterPeople(by: searchText)
+            self.peopleCollectionView.reloadData()
         } else {
+//            guard let searchText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines), searchText.count >= 2 else {
+//                // If less than 2 characters, show full sorted list
+//                self.filteredPeopleArr = self.peopleArr.sorted { ($0.name ?? "") < ($1.name ?? "") }
+//                self.peopleCollectionView.reloadData()
+//                return
+//            }
+//
+//            self.filteredPeopleArr = self.peopleArr.filter {
+//                ($0.name ?? "").lowercased().contains(searchText.lowercased())
+//            }.sorted { ($0.name ?? "") < ($1.name ?? "") }
+//
             guard let searchText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines), searchText.count >= 2 else {
                 // If less than 2 characters, show full sorted list
-                self.filteredPeopleArr = self.peopleArr.sorted { ($0.name ?? "") < ($1.name ?? "") }
+                if let data = self.peopleData?.data {
+                    self.filteredPeopleArrApi = data.sorted { ($0.name ?? "") < ($1.name ?? "") }
+                }
                 self.peopleCollectionView.reloadData()
                 return
             }
 
-            self.filteredPeopleArr = self.peopleArr.filter {
-                ($0.name ?? "").lowercased().contains(searchText.lowercased())
-            }.sorted { ($0.name ?? "") < ($1.name ?? "") }
+            if let data = self.peopleData?.data {
+                self.filteredPeopleArrApi = data.filter {
+                    ($0.name ?? "").lowercased().contains(searchText.lowercased())
+                }.sorted { ($0.name ?? "") < ($1.name ?? "") }
+            }
         }
-
         self.peopleCollectionView.reloadData()
     }
 
@@ -196,23 +240,27 @@ class PeopleViewController: UIViewController {
 
 extension PeopleViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.filteredPeopleArr.count
+        return self.filteredPeopleArrApi.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellNibName.peopleCollectionViewCell.rawValue, for: indexPath) as! PeopleCollectionViewCell
-        cell.userModel = self.filteredPeopleArr[indexPath.item]
-        cell.setupView(isFromRecognition: self.isFromRecognition)
+       // cell.userModel = self.filteredPeopleArr[indexPath.item]
+        if !isFromRecognition {cell.currentUserId = AppAccess.shared.user?.userId ?? 0}
+        cell.peopleModel = self.filteredPeopleArrApi[indexPath.item]
+        cell.setupViewApi(isFromRecognition: self.isFromRecognition)
         cell.didTapRecognition = { [weak self] (selectedUser) in
             let vc = UIStoryboard.init(name: "Main", bundle: Bundle.main)
                 .instantiateViewController(withIdentifier: NibName.giveRecognitionViewController.rawValue) as? GiveRecognitionViewController
-            vc?.selectedUser = selectedUser
+           // vc?.selectedUser = selectedUser
+            vc?.selectedUserApi = selectedUser
             self?.navigationController?.pushViewController(vc!, animated: true)
         }
         cell.didTapViewProfile = { [weak self] (selectedUser) in
             let vc = UIStoryboard.init(name: "Main", bundle: Bundle.main)
                 .instantiateViewController(withIdentifier: NibName.profileViewController.rawValue) as? ProfileViewController
-            vc?.selectedUser = selectedUser
+           // vc?.selectedUser = selectedUser
+            vc?.selectedUserApi = selectedUser
             vc?.isFromPeople = true
             self?.navigationController?.pushViewController(vc!, animated: true)
         }
@@ -222,13 +270,14 @@ extension PeopleViewController: UICollectionViewDelegate, UICollectionViewDataSo
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if isFromRecognition {
             if !self.isTagSearch {
-                self.didTapUser?(self.filteredPeopleArr[indexPath.item])
+                self.didTapUser?(self.filteredPeopleArrApi[indexPath.item])
                 self.dismiss(animated: true)
             } else {
                 let vc = UIStoryboard.init(name: "Main", bundle: Bundle.main)
                     .instantiateViewController(withIdentifier: NibName.profileViewController.rawValue) as? ProfileViewController
                 vc?.isFromPeople = true
                 vc?.selectedUser = self.filteredPeopleArr[indexPath.row]
+//                vc?.selectedUserApi = self.filteredPeopleArrApi[indexPath.row]
                 self.navigationController?.pushViewController(vc!, animated: true)
             }
         }

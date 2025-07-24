@@ -3,7 +3,6 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
-        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -21,9 +20,11 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iia-f1-kK1">
                         <rect key="frame" x="0.0" y="5" width="565" height="103"/>
                         <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="background" translatesAutoresizingMaskIntoConstraints="NO" id="AaI-ic-qpt">
+                                <rect key="frame" x="5" y="29" width="45" height="45"/>
+                            </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qkr-eV-S80">
                                 <rect key="frame" x="5" y="29" width="45" height="45"/>
-                                <color key="backgroundColor" name="AppColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="45" id="18x-hP-tR6"/>
                                     <constraint firstAttribute="height" constant="45" id="o4a-B3-qBi"/>
@@ -62,11 +63,15 @@
                             <constraint firstItem="qkr-eV-S80" firstAttribute="leading" secondItem="iia-f1-kK1" secondAttribute="leading" constant="5" id="2kX-Aw-seY"/>
                             <constraint firstItem="EQF-ru-yJ4" firstAttribute="leading" secondItem="BBn-2N-qXT" secondAttribute="trailing" constant="8" id="71m-Zj-jAH"/>
                             <constraint firstItem="BBn-2N-qXT" firstAttribute="centerY" secondItem="qkr-eV-S80" secondAttribute="centerY" id="C0R-Ye-qtQ"/>
+                            <constraint firstItem="qkr-eV-S80" firstAttribute="top" secondItem="AaI-ic-qpt" secondAttribute="top" id="IzW-Vs-ycz"/>
+                            <constraint firstItem="qkr-eV-S80" firstAttribute="leading" secondItem="AaI-ic-qpt" secondAttribute="leading" id="Mxk-1T-Q9R"/>
                             <constraint firstItem="qkr-eV-S80" firstAttribute="centerY" secondItem="iia-f1-kK1" secondAttribute="centerY" id="Ofx-wr-rLV"/>
                             <constraint firstItem="BBn-2N-qXT" firstAttribute="leading" secondItem="qkr-eV-S80" secondAttribute="trailing" constant="10" id="RGR-pw-8fS"/>
                             <constraint firstAttribute="trailing" secondItem="EQF-ru-yJ4" secondAttribute="trailing" constant="10" id="bzY-aJ-SIV"/>
                             <constraint firstItem="rwi-be-uWb" firstAttribute="trailing" secondItem="EQF-ru-yJ4" secondAttribute="trailing" id="ihp-Qi-81H"/>
                             <constraint firstItem="EQF-ru-yJ4" firstAttribute="top" secondItem="qkr-eV-S80" secondAttribute="top" id="k5I-ug-wLT"/>
+                            <constraint firstItem="qkr-eV-S80" firstAttribute="centerX" secondItem="AaI-ic-qpt" secondAttribute="centerX" id="qOy-eU-2nj"/>
+                            <constraint firstItem="qkr-eV-S80" firstAttribute="centerY" secondItem="AaI-ic-qpt" secondAttribute="centerY" id="t1X-aG-s1z"/>
                             <constraint firstItem="rwi-be-uWb" firstAttribute="bottom" secondItem="qkr-eV-S80" secondAttribute="bottom" id="ur9-bh-VYd"/>
                         </constraints>
                     </view>
@@ -81,6 +86,7 @@
             </collectionViewCellContentView>
             <size key="customSize" width="565" height="113"/>
             <connections>
+                <outlet property="bg" destination="AaI-ic-qpt" id="kza-Lp-vef"/>
                 <outlet property="cellView" destination="iia-f1-kK1" id="1ei-n9-moO"/>
                 <outlet property="lblDate" destination="EQF-ru-yJ4" id="qqw-wK-FjL"/>
                 <outlet property="lblIcon" destination="qkr-eV-S80" id="NJm-rl-YKm"/>
@@ -91,9 +97,7 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <namedColor name="AppColor">
-            <color red="0.8666666666666667" green="0.32941176470588235" blue="0.14901960784313725" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
+        <image name="background" width="5008" height="1456"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
