@@ -283,6 +283,7 @@ class TeamList(APIView):
                     "user_id": user.id,
                     "name": user.get_full_name() if hasattr(user, "get_full_name") else user.username,
                     "email": user.email,
+                    "designation":user.designation,
                     "star_count": star_count,
                     "skills": SkillSerializer(skills, many=True).data,
                     "recognitions": {
