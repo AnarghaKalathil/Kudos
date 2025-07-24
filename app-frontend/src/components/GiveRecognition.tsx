@@ -174,8 +174,8 @@ useEffect(() => {
                   {filteredEmployees.map(employee => (
                     <SelectItem key={employee.id} value={employee.id.toString()}>
                       <div className="flex items-center gap-3">
-                        <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
+                        <Avatar className="w-8 h-8   bg-primary text-sm text-white">
+                          <AvatarFallback className="bg-primary text-white foreground text-xsm font-bold">
                             {employee.initials}
                           </AvatarFallback>
                         </Avatar>
@@ -189,9 +189,9 @@ useEffect(() => {
                 </SelectContent>
               </Select>
               {selectedEmployeeData && (
-                <div className="flex items-center gap-3 p-3 bg-secondary/40 rounded-xl mt-2 shadow-inner">
-                  <Avatar className="w-8 h-8 border-2 border-primary/30">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-8 h-8   bg-primary text-sm text-white">
+                          <AvatarFallback className="bg-primary text-white foreground text-xsm font-bold">
                       {selectedEmployeeData.initials}
                     </AvatarFallback>
                   </Avatar>
@@ -256,8 +256,8 @@ useEffect(() => {
                   {filteredEmployees.map(employee => (
                     <SelectItem key={employee.id} value={employee.id.toString()}>
                       <div className="flex items-center gap-3">
-                        <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
+                        <Avatar className="w-8 h-8   bg-primary text-sm text-white">
+                          <AvatarFallback className="bg-primary text-white foreground text-xsm font-bold">
                             {employee.initials}
                           </AvatarFallback>
                         </Avatar>

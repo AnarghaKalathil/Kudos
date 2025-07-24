@@ -19,6 +19,7 @@ const Index = () => {
   const [isFromGiveStar, setIsFromGiveStar] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     // Get user from localStorage
@@ -26,6 +27,10 @@ const Index = () => {
     if (userData) {
       setUser(JSON.parse(userData));
     }
+    // Fetch profile from API
+    getUserProfileAPI().then((data) => {
+      setProfile(data);
+    });
   }, []);
 
     const handleLogout = async () => {
@@ -122,7 +127,7 @@ const Index = () => {
           {activeTab === 'overview' && (
             <section>
               <div className="bg-white/80 backdrop-blur-md border shadow-xl rounded-2xl p-8 mb-12 mt-10 flex flex-col items-center text-center">
-                <h2 className="text-3xl font-extrabold mb-2 text-foreground">Hi, {user?.first_name || user?.username || user?.email || "User"}! ✨</h2>
+                <h2 className="text-3xl font-extrabold mb-2 text-foreground"> {profile?.username || user?.username || user?.first_name || user?.email || "User"}! ✨</h2>
                 <p className="text-lg text-muted-foreground mb-4">Ready to spread some appreciation? </p>
                 <Button className="bg-gradient-to-r from-primary to-accent text-white px-6 py-3 rounded-xl shadow-lg text-lg font-semibold hover:scale-105 transition-transform" onClick={() => setActiveTab('review')}>Review Requests</Button>
               </div>

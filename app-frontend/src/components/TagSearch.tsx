@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Filter, Star, MessageCircle, Trophy,User } from "lucide-react";
+import { Search, Filter, Star,User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +55,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
           recognitions: emp.recognitions || [],
           email: emp.email,
           initials: emp.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '',
+          star_summary: emp.star_summary || {},
         }));
         setEmployees(mapped);
       }
@@ -263,7 +264,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                   <div className="flex-1 text-center sm:text-left">
                     <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-1">{viewingEmployee.name}</h1>
                     <p className="text-lg sm:text-xl text-muted-foreground font-medium">{viewingEmployee.role}</p>
-                    <p className="text-base text-muted-foreground mb-2">{viewingEmployee.department} • {viewingEmployee.email}</p>
+                    <p className="text-base text-muted-foreground mb-2">{viewingEmployee.department}  {viewingEmployee.email}</p>
                     {/* Stars & Trophy */}
                     <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 mt-4">
                       <div className="flex items-center gap-2">
@@ -272,7 +273,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                         <span className="text-base text-muted-foreground">stars earned</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Trophy className="w-6 h-6 text-warning" />
+                 
                       </div>
                     </div>
                   </div>
@@ -297,21 +298,20 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                     )}
                   </div>
                 </div>
-                {/* Recognitions */}
-                <div className="mt-8 space-y-2">
-                  <h4 className="text-base font-semibold text-foreground">Recognitions</h4>
-                  <div className="flex flex-col gap-2">
-                    <div>
-                      <span className="font-semibold">Pending:</span> {(viewingEmployee.recognitions?.pending?.length ?? 0)}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Approved:</span> {(viewingEmployee.recognitions?.approved?.length ?? 0)}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Rejected:</span> {(viewingEmployee.recognitions?.rejected?.length ?? 0)}
+                {/* Skills/Star Summary */}
+                {viewingEmployee.star_summary && Object.keys(viewingEmployee.star_summary).length > 0 && (
+                  <div className="mt-8 space-y-2">
+                    <h4 className="text-base font-semibold text-foreground">Categories </h4>
+                    <div className="space-y-1">
+                      {Object.entries(viewingEmployee.star_summary).map(([category, count]) => (
+                        <div key={category} className="flex items-center justify-between">
+                          <span className="text-base font-semibold">{category}</span>
+                          <span className="text-xl font-bold text-star">{String(count)}★</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </DialogContent>
