@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, Users, Trophy, Search, Plus, Award, Target, LogOut, MessageCircle, Layers, ListChecks, UserCog } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import RecognitionTabs from "@/components/Leaderboard";
 import UsersPage from "@/admin/pages/Userspage";
 import CategoriesPage from "@/admin/pages/CategoriesPage";
 import SkillList from "@/admin/pages/skillList";
+import { getDashboardAPI } from "../lib/api";
 
 // Dynamic admin flag based on login
 const isAdmin = typeof window !== 'undefined' && localStorage.getItem('isSuperuser') === 'true';
@@ -30,6 +31,29 @@ export const UnifiedDashboard = () => {
   const navigate = useNavigate();
   // Placeholder user info
   const user = { username: "User" };
+
+  // Dashboard stats state
+  const [dashboardStats, setDashboardStats] = useState({
+    total_number_of_users: 0,
+    total_contributors: 0,
+    total_star_count: 0,
+    total_skill_count: 0,
+  });
+  // Fetch dashboard stats on mount
+  useEffect(() => {
+    const fetchStats = async () => {
+      const data = await getDashboardAPI();
+      if (data && data.total_count) {
+        setDashboardStats({
+          total_number_of_users: data.total_count.total_number_of_users || 0,
+          total_contributors: data.total_count.total_contributors || 0,
+          total_star_count: data.total_count.total_star_count || 0,
+          total_skill_count: data.total_count.total_skill_count || 0,
+        });
+      }
+    };
+    fetchStats();
+  }, []);
 
   // Sidebar navigation items
   const userNav = [
@@ -134,25 +158,25 @@ export const UnifiedDashboard = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                 <Card className="flex flex-col flex-1 text-center shadow-lg bg-white/70 rounded-xl h-full min-h-[120px]">
                   <CardContent className="pt-6 pb-4 flex-1 flex flex-col justify-end">
-                    <div className="text-3xl font-extrabold text-primary mb-1">247</div>
+                    <div className="text-3xl font-extrabold text-primary mb-1">{dashboardStats.total_star_count}</div>
                     <div className="text-base text-muted-foreground">Total Stars</div>
                   </CardContent>
                 </Card>
                 <Card className="flex flex-col flex-1 text-center shadow-lg bg-white/70 rounded-xl h-full min-h-[120px]">
                   <CardContent className="pt-6 pb-4 flex-1 flex flex-col justify-end">
-                    <div className="text-3xl font-extrabold text-accent mb-1">89</div>
+                    <div className="text-3xl font-extrabold text-accent mb-1">{dashboardStats.total_contributors}</div>
                     <div className="text-base text-muted-foreground">Contributors</div>
                   </CardContent>
                 </Card>
                 <Card className="flex flex-col flex-1 text-center shadow-lg bg-white/70 rounded-xl h-full min-h-[120px]">
                   <CardContent className="pt-6 pb-4 flex-1 flex flex-col justify-end">
-                    <div className="text-3xl font-extrabold text-info mb-1">16</div>
+                    <div className="text-3xl font-extrabold text-info mb-1">{dashboardStats.total_skill_count}</div>
                     <div className="text-base text-muted-foreground">Skills</div>
                   </CardContent>
                 </Card>
                 <Card className="flex flex-col flex-1 text-center shadow-lg bg-white/70 rounded-xl h-full min-h-[120px]">
                   <CardContent className="pt-6 pb-4 flex-1 flex flex-col justify-end">
-                    <div className="text-3xl font-extrabold text-warning mb-1">23</div>
+                    <div className="text-3xl font-extrabold text-warning mb-1">{dashboardStats.total_number_of_users}</div>
                     <div className="text-base text-muted-foreground">Users</div>
                   </CardContent>
                 </Card>
