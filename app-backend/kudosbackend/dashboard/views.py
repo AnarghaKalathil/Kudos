@@ -77,7 +77,8 @@ class Dashboard(APIView):
             total_users = KudosUser.objects.filter(is_superuser=False).count()
 
             total_contributors = KudosUser.objects.filter(
-                recognitions_given__isnull=False
+                recognitions_given__isnull=False,
+                recognitions_given__status=RecognitionStatus.APPROVED
             ).distinct().count()
 
             total_star_count = Star.objects.count()
