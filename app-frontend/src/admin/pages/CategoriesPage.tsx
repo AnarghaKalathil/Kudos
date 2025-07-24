@@ -11,13 +11,14 @@ const CategoriesPage: React.FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '' });
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const entriesPerPage = 10;
+  const entriesPerPage = 15;
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -74,14 +75,27 @@ const CategoriesPage: React.FC = () => {
     { key: 'name', label: 'Category Name' },
   ];
 
-  const paginatedCategories = categories.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
-  const totalPages = Math.ceil(categories.length / entriesPerPage);
+  // Filter categories by search term
+  const filteredCategories = categories.filter((c) =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const paginatedCategories = filteredCategories.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
+  const totalPages = Math.ceil(filteredCategories.length / entriesPerPage);
 
   return (
     <div className="w-full">
       <div className="flex flex-row items-center justify-between py-6 px-2">
         <h2 className="text-2xl font-bold text-foreground">Categories</h2>
         <Button onClick={handleOpen} className="bg-gradient-to-r from-primary to-accent text-white px-6 py-3 rounded-xl shadow-lg text-lg font-semibold hover:scale-105 transition-transform">Add Category</Button>
+      </div>
+      <div className="flex flex-row items-center justify-end px-2 pb-2">
+        <input
+          type="text"
+          placeholder="Search categories..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="mb-2 px-4 py-2 border rounded-lg w-full max-w-xs"
+        />
       </div>
       <div className="w-full">
         {loading ? (

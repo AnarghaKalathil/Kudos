@@ -11,6 +11,7 @@ interface Props {
   handleSubmit: () => void;
   title: string;
   isDeleteConfirm?: boolean;
+  error?: string | null;
 }
 
 const FormModal: React.FC<Props> = ({
@@ -20,7 +21,8 @@ const FormModal: React.FC<Props> = ({
   setFormData,
   handleSubmit,
   title,
-  isDeleteConfirm = false
+  isDeleteConfirm = false,
+  error
 }) => {
   const [passwordError, setPasswordError] = useState('');
 
@@ -48,6 +50,9 @@ const FormModal: React.FC<Props> = ({
         <DialogHeader>
           <DialogTitle className="text-lg font-bold text-foreground mb-2">{title}</DialogTitle>
         </DialogHeader>
+        {error && !isDeleteConfirm && (
+          <div className="mb-2 text-sm text-red-600 text-center">{error}</div>
+        )}
         {isDeleteConfirm ? (
           <form className="space-y-3">
             <div className="flex flex-col gap-1">
