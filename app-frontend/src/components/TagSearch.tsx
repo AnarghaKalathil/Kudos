@@ -182,7 +182,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                   className="cursor-pointer rounded-full px-3 py-1 text-base font-medium hover:bg-primary hover:text-primary-foreground transition"
                   onClick={() => setSelectedSkill(selectedSkill === skill ? "any-skill" : skill)}
                 >
-                  {skill} ({expertCount})
+                  {skill} 
                 </Badge>
               );
             })}
