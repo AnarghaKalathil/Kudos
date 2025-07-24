@@ -17,13 +17,13 @@ class RecognitionListSerializer(serializers.ModelSerializer):
                   "reviewed_at", "created_at", "sender",
                   "reviewer", "skills", "status","id"]
     def get_receiver(self, obj):
-        return obj.receiver.get_full_name() if obj.sender  else None
+        return obj.receiver.username if obj.sender  else None
 
     def get_sender(self, obj):
-        return obj.sender.get_full_name() if obj.sender  else None
+        return obj.sender.username if obj.sender  else None
 
     def get_reviewer(self, obj):
-        return obj.reviewer.get_full_name() if obj.reviewer else None
+        return obj.reviewer.username if obj.reviewer else None
 
     def get_skills(self, obj):
         return obj.skills.all().values_list("name", flat=True)
@@ -49,13 +49,13 @@ class RecognitionSerializer(serializers.ModelSerializer):
         fields = ["sender", "receiver", "category", "message", "skills", "reviewer"]
 
     def get_receiver(self, obj):
-        return obj.receiver.get_full_name() if obj.sender  else None
+        return obj.receiver.username if obj.sender  else None
 
     def get_sender(self, obj):
-        return obj.sender.get_full_name() if obj.sender  else None
+        return obj.sender.username if obj.sender  else None
 
     def get_reviewer(self, obj):
-        return obj.reviewer.get_full_name() if obj.reviewer else None
+        return obj.reviewer.username if obj.reviewer else None
 
     def get_skills(self, obj):
         return obj.skills.all().values_list("name", flat=True)
@@ -77,12 +77,9 @@ class SkillSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField()
-
     class Meta:
         model = KudosUser
         fields = [
-            "full_name"
             "username",
             "first_name",
             "last_name",
@@ -91,8 +88,6 @@ class UserSerializer(serializers.ModelSerializer):
             "department",
         ]
 
-    def get_full_name(self,obj):
-        return obj.get_full_name()
 
 class StatusUpdateSerializer(serializers.Serializer):
     id = serializers.IntegerField()
