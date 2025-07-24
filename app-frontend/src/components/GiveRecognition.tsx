@@ -90,6 +90,7 @@ useEffect(() => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const sender = JSON.parse(localStorage.getItem('user') || '{}').user_id;
     if (!selectedEmployees || !category || !message || !reviewer || !selectedSkill) {
       toast({
         title: "Please fill in all fields",
@@ -98,12 +99,24 @@ useEffect(() => {
       });
       return;
     }
+        // Validation: teammate, reviewer, and user must all be different
+        if (
+          selectedEmployees === reviewer ||
+          selectedEmployees === sender.toString() ||
+          reviewer === sender.toString()
+        ) {
+          toast({
+            title: "Invalid selection",
+            description: "Teammate and reviewer must be different people.",
+            variant: "destructive"
+          });
+          return;
+        }
     try {
       // Find integer IDs for receiver, category, reviewer
       const receiverId = parseInt(selectedEmployees);
       const categoryId = parseInt(category);
       const reviewerId = parseInt(reviewer);
-      const sender = JSON.parse(localStorage.getItem('user') || '{}').user_id;
       // Use selected skill IDs
       const skillIds = selectedSkill ? [parseInt(selectedSkill)] : [];
       const response = await giveRecognitionAPI({
