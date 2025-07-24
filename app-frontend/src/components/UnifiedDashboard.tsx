@@ -104,7 +104,7 @@ export const UnifiedDashboard = () => {
         <div className="flex flex-col items-center mb-4 mt-4">
              <div className="flex flex-row items-center gap-6 mb-6 justify-start">
           <img src="/Logoone.png" alt="Kudos Logo" className="w-10 h-10 rounded-2xl shadow-md" />       
-            <h1 className="text-xl font-bold text-foreground tracking-tight">Kudos<span className="ml-6">✨</span></h1>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">Kudos<span className="ml-6"></span></h1>
         </div>
           {profile && (
             <div className="flex items-center gap-3 bg-white/90 rounded-xl shadow px-4 py-3 w-60">
@@ -113,13 +113,13 @@ export const UnifiedDashboard = () => {
                   <img src={profile.avatar} alt={profile.name} className="w-8 h-8 rounded-full object-cover border-2 border-primary/30 shadow" />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow">
-                    {profile.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
+                    {(profile.name && profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()) || 'A'}
                   </div>
                 )}
               </div>
               
               <div className="flex-1 min-w-0">
-                <div className="text-lg font-bold text-foreground truncate">{profile.name}</div>
+                <div className="text-lg font-bold text-foreground">{profile.name || 'Admin'}</div>
                 <div className="text-sm text-muted-foreground font-medium truncate">{profile.designation || profile.role}</div>
               </div>
               <div className="flex items-center gap-1 ml-2">
@@ -162,7 +162,7 @@ export const UnifiedDashboard = () => {
             <>
               <div className="pt-[72px]" />
               <div className="bg-white/80 backdrop-blur-md border shadow-xl rounded-2xl p-8 mb-8 flex flex-col items-center text-center">
-                <h2 className="text-3xl font-extrabold mb-2 text-foreground">Hi, {profile?.username || user?.username || user?.first_name || user?.email || "User"}! ✨</h2>
+                <h2 className="text-3xl font-extrabold mb-2 text-foreground">Hi, {profile?.name || user?.name || user?.first_name || user?.email || "User"}! ✨</h2>
                 <p className="text-lg text-muted-foreground mb-4">Ready to spread some appreciation? </p>
                 <Button className="bg-gradient-to-r from-primary to-accent text-white px-6 py-3 rounded-xl shadow-lg text-lg font-semibold hover:scale-105 transition-transform" onClick={() => setActiveTab('review')}>Review Requests</Button>
               </div>
