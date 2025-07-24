@@ -152,8 +152,8 @@ export default function RecognitionTabs() {
                                 <span className="text-xs text-muted-foreground">• {recognition.date}</span>
                               </div>
                               <p className="text-sm text-muted-foreground mb-1">
-                                recognized <span className="font-medium">{recognition.to}</span> for{" "}
-                                <strong>{recognition.skill}</strong>
+                                recognized <span className="font-bold text-success text-md">{recognition.to}</span> for{" "}
+                                <strong className="text-warning text-md">{recognition.skill}</strong>
                               </p>
                               <p className="text-sm mb-3 italic">“{recognition.message}”</p>
                               <div className="flex gap-1 flex-wrap">

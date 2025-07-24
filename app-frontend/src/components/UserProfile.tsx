@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star, Award, Trophy, Calendar, MessageCircle, TrendingUp } from "lucide-react";
+import { Star, Award,  TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -130,7 +130,7 @@ export const UserProfile = () => {
               <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-1">{profile?.name || user?.name || `${user?.first_name || ''} ${user?.last_name || ''}`}</h1>
           
               <p className="text-lg sm:text-xl text-muted-foreground font-medium">{user?.designation || user?.role}</p>
-              <p className="text-base text-muted-foreground mb-2">{user?.department} • {user?.email}</p>
+              <p className="text-base text-muted-foreground mb-2">{user?.department}  {user?.email}</p>
               <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 mt-4">
                 <div className="flex items-center gap-2">
                   <Star className="w-6 h-6 text-star" />
@@ -213,10 +213,11 @@ export const UserProfile = () => {
           </div>
         </TabsContent>
         <TabsContent value="recognitions" className="space-y-6">
+          {/* Sub-tabs for Received/Sent: visually distinct, smaller, subtle */}
           <Tabs defaultValue="received" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 rounded-xl bg-muted/40 mb-6">
-              <TabsTrigger value="received" className="rounded-xl text-lg font-semibold data-[state=active]:bg-primary/10 data-[state=active]:text-primary">Received</TabsTrigger>
-              <TabsTrigger value="sent" className="rounded-xl text-lg font-semibold data-[state=active]:bg-primary/10 data-[state=active]:text-primary">Sent</TabsTrigger>
+            <TabsList className="flex w-full justify-center gap-2 rounded-lg bg-muted/20 mb-4 p-1">
+              <TabsTrigger value="received" className="rounded-md px-4 py-1 text-sm font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary bg-white/60 text-muted-foreground transition">Received</TabsTrigger>
+              <TabsTrigger value="sent" className="rounded-md px-4 py-1 text-sm font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary bg-white/60 text-muted-foreground transition">Sent</TabsTrigger>
             </TabsList>
             <TabsContent value="received" className="space-y-6">
               {receiverRecognitions.length === 0 ? (
