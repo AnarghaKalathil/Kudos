@@ -158,11 +158,15 @@ export const logoutAPI = async (): Promise<{ success: boolean; message?: string 
     console.log('Logout API response:', data);
     removeToken();
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('authToken');
     return { success: true };
   } catch (e) {
     console.log('Logout API error:', e);
     removeToken();
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('authToken');
     return { success: false, message: 'Logout error' };
   }
 };

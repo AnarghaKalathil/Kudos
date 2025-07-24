@@ -118,7 +118,7 @@ export default function RecognitionTabs() {
           <TabsList className="grid grid-cols-3 p-4 gap-2 h-16">
             <TabsTrigger value="pending">Pending</TabsTrigger>
             <TabsTrigger value="accepted">Approved</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected</TabsTrigger>
+            <TabsTrigger value="rejected">Declined</TabsTrigger>
           </TabsList>
 
           {["pending", "accepted", "rejected"].map((status) => (

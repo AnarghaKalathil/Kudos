@@ -34,7 +34,7 @@ export const GiveRecognition = ({ selectedEmployee,isFromGiveStar }: GiveRecogni
   const [selectedEmployees, setSelectedEmployees] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [message, setMessage] = useState<string>("");
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [selectedSkill, setSelectedSkill] = useState<string>("");
   const [reviewer, setReviewer] = useState<string>("");
   const [employees, setEmployees] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -90,7 +90,7 @@ useEffect(() => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedEmployees || !category || !message || !reviewer || selectedSkills.length === 0) {
+    if (!selectedEmployees || !category || !message || !reviewer || !selectedSkill) {
       toast({
         title: "Please fill in all fields",
         description: "All fields are required to submit recognition.",
@@ -105,7 +105,7 @@ useEffect(() => {
       const reviewerId = parseInt(reviewer);
       const sender = JSON.parse(localStorage.getItem('user') || '{}').user_id;
       // Use selected skill IDs
-      const skillIds = selectedSkills.map(id => parseInt(id));
+      const skillIds = selectedSkill ? [parseInt(selectedSkill)] : [];
       const response = await giveRecognitionAPI({
         sender,
         receiver: receiverId,
@@ -122,7 +122,7 @@ useEffect(() => {
         setSelectedEmployees("");
         setCategory("");
         setMessage("");
-        setSelectedSkills([]);
+        setSelectedSkill("");
         setReviewer("");
       } else {
         toast({
@@ -141,6 +141,8 @@ useEffect(() => {
   };
 
   const selectedEmployeeData = employees.find(emp => emp.id === parseInt(selectedEmployees));
+  const userId = JSON.parse(localStorage.getItem('user') || '{}').user_id;
+  const filteredEmployees = employees.filter(emp => emp.id.toString() !== userId?.toString());
 
   // Add a key to the form to force remount when selectedEmployee changes
   const formKey = selectedEmployee?.id || 'default';
@@ -169,7 +171,7 @@ useEffect(() => {
                   <SelectValue placeholder="Select a teammate" />
                 </SelectTrigger>
                 <SelectContent>
-                  {employees.map(employee => (
+                  {filteredEmployees.map(employee => (
                     <SelectItem key={employee.id} value={employee.id.toString()}>
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
@@ -219,9 +221,9 @@ useEffect(() => {
             {/* Skills Dropdown */}
             <div className="space-y-2">
               <label className="text-base font-semibold text-foreground">Skills</label>
-              <Select multiple value={selectedSkills} onValueChange={setSelectedSkills}>
+              <Select value={selectedSkill} onValueChange={setSelectedSkill}>
                 <SelectTrigger className="rounded-lg shadow bg-background/80">
-                  <SelectValue placeholder="Select skills" />
+                  <SelectValue placeholder="Select skill" />
                 </SelectTrigger>
                 <SelectContent>
                   {skills.map((skill: any) => (
@@ -251,7 +253,7 @@ useEffect(() => {
                   <SelectValue placeholder="Select reviewer" />
                 </SelectTrigger>
                 <SelectContent>
-                  {employees.map(employee => (
+                  {filteredEmployees.map(employee => (
                     <SelectItem key={employee.id} value={employee.id.toString()}>
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8 shadow border-2 border-primary/30">
