@@ -15,6 +15,7 @@ interface Employee {
   id: string;
   name: string;
   role: string;
+  designation?: string;
   stars: number;
   skills: string[];
   email: string;
@@ -35,6 +36,7 @@ export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
           id: emp.user_id,
           name: emp.name,
           role: emp.role || '',
+          designation: emp.designation || '',
           stars: emp.star_count || 0,
           skills: emp.skills || [],
           email: emp.email,
@@ -98,6 +100,9 @@ export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
                   </Avatar>
                   <div className="flex-1">
                     <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
+                    {employee.designation && (
+                      <div className="text-base text-muted-foreground font-medium">{employee.designation}</div>
+                    )}
                     <CardDescription className="text-base">{employee.role}</CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -108,11 +113,16 @@ export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
               </CardHeader>
               <CardContent className="space-y-4 flex-1 flex flex-col justify-end">
                 <div className="flex flex-wrap gap-2">
-                  {employee.skills.slice(0, 3).map((skill, index) => (
-                    <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-sm font-medium">
-                      {skill == null ? '' : (typeof skill === 'object' ? skill.name : skill)}
-                    </Badge>
-                  ))}
+                  {employee.skills.slice(0, 3).map((skill, index) => {
+                    if (skill == null) return null;
+                    const skillName = typeof skill === 'object' ? skill.name : skill;
+                    if (!skillName) return null;
+                    return (
+                      <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-sm font-medium">
+                        {skillName}
+                      </Badge>
+                    );
+                  })}
                   {employee.skills.length > 3 && (
                     <Badge variant="outline" className="rounded-full px-3 py-1 text-sm font-medium">
                       +{employee.skills.length - 3} more

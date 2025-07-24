@@ -12,15 +12,13 @@ const AdminDashboardUnified = () => {
     <div className="min-h-screen flex bg-gradient-to-br from-background to-secondary/60">
       {/* Sidebar */}
       <aside className="flex flex-col w-64 min-h-screen bg-card/90 backdrop-blur-lg shadow-xl border-r border-border px-0 py-8 fixed left-0 top-0 z-40">
-        <div className="flex flex-col items-center gap-6 mb-10">
-          <div className="w-14 h-14 bg-gradient-to-tr from-primary to-accent rounded-2xl flex items-center justify-center shadow-md">
-            <Star className="w-8 h-8 text-primary-foreground drop-shadow" />
+     <div className="flex flex-col items-center gap-6 mb-10 pt-8">
+            <img src="/Logoone.png" alt="Kudos Logo" className="w-14 h-14 rounded-2xl shadow-md" />
+            <div className="text-center">
+              <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Kudos</h1>
+              <p className="text-sm text-muted-foreground font-medium">Recognition & Knowledge Platform</p>
+            </div>
           </div>
-          <div className="text-center">
-            <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Kudos Admin</h1>
-            <p className="text-sm text-muted-foreground font-medium">Admin Panel</p>
-          </div>
-        </div>
         <nav className="flex flex-col gap-2 w-full px-6">
           <button onClick={() => setActiveTab('overview')} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all ${activeTab==='overview' ? 'bg-primary/10 text-primary' : 'hover:bg-muted/60'}`}><PanelLeft className="w-5 h-5" /> Overview</button>
           <button onClick={() => setActiveTab('users')} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all ${activeTab==='users' ? 'bg-primary/10 text-primary' : 'hover:bg-muted/60'}`}><Users className="w-5 h-5" /> Users</button>

@@ -137,9 +137,6 @@ export const UserProfile = () => {
                   <span className="text-2xl sm:text-3xl font-extrabold text-star">{profile?.total_stars ?? totalStars}</span>
                   <span className="text-base text-muted-foreground">stars earned</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Trophy className="w-6 h-6 text-warning" />
-                </div>
               </div>
             </div>
           </div>

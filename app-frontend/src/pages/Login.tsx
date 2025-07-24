@@ -28,9 +28,14 @@ const Login = () => {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     try {
+      // Always clear old tokens before login
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('accessToken');
       const response = await loginAPI({ email: data.email, password: data.password });
       console.log('Login API (frontend) response:', response);
       if (response && response.data && response.status) {
+        // Set the correct token key for your app
+        localStorage.setItem('authToken', response.data.access_token);
         localStorage.setItem('accessToken', response.data.access_token);
         localStorage.setItem('refreshToken', response.data.refresh_token);
         localStorage.setItem('isSuperuser', response.data.user_data.is_superuser ? 'true' : 'false');

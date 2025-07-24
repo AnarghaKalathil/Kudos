@@ -13,6 +13,7 @@ interface Employee {
   id: string;
   name: string;
   role: string;
+  designation?: string;
   department: string;
   stars: number;
   skills: string[];
@@ -47,6 +48,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
           id: emp.user_id,
           name: emp.name,
           role: emp.role || '',
+          designation: emp.designation || '',
           department: emp.department || '',
           stars: emp.star_count || 0,
           skills: emp.skills || [],
@@ -199,6 +201,9 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                   </Avatar>
                   <div className="flex-1">
                     <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
+                    {employee.designation && (
+                      <div className="text-base text-muted-foreground font-medium">{employee.designation}</div>
+                    )}
                     <CardDescription className="text-base">{employee.role}</CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -212,9 +217,10 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                   {(employee.skills || []).map((skill, index) => {
                     if (skill == null) return null;
                     const skillName = typeof skill === 'object' ? skill.name : skill;
+                    if (!skillName) return null;
                     return (
                       <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-sm font-medium">
-                        {typeof skill === 'object' ? skill.name : skill}
+                        {skillName}
                       </Badge>
                     );
                   })}
@@ -278,11 +284,16 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
                     {(viewingEmployee.skills || []).length === 0 ? (
                       <span className="text-muted-foreground text-sm">No skills listed.</span>
                     ) : (
-                      (viewingEmployee.skills || []).map((skill, index) => (
-                        <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-base font-medium">
-                          {skill == null ? '' : (typeof skill === 'object' ? skill.name : skill)}
-                        </Badge>
-                      ))
+                      (viewingEmployee.skills || []).map((skill, index) => {
+                        if (skill == null) return null;
+                        const skillName = typeof skill === 'object' ? skill.name : skill;
+                        if (!skillName) return null;
+                        return (
+                          <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-base font-medium">
+                            {skillName}
+                          </Badge>
+                        );
+                      })
                     )}
                   </div>
                 </div>

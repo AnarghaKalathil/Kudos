@@ -248,6 +248,9 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           >
+            <div className="flex flex-col items-center gap-6 mb-10 mt-8">
+              <img src="/Logoone.png" alt="Kudos Logo" className="w-14 h-14 rounded-2xl shadow-md" />
+            </div>
             {children}
           </div>
         </div>
