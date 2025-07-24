@@ -74,15 +74,15 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden">
+      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden">
         {/* Left: Illustration and message */}
-        <div className="md:w-1/2 flex flex-col items-center justify-center bg-white/80 p-8 text-foreground">
+        <div className="md:w-1/2 flex flex-col items-center justify-center bg-white/80 p-12 text-foreground">
           <div className="w-full flex flex-col items-center justify-center h-full">
-            <img src="/Frame_1.png" alt="Recognize teammates" className="max-w-xs w-full h-auto rounded-xl shadow-2xl mx-auto" />
+            <img src="/Frame_1.png" alt="Recognize teammates" className="max-w-xl w-full h-auto rounded-xl shadow-2xl mx-auto" />
           </div>
         </div>
         {/* Right: Login form */}
-        <div className="md:w-1/2 flex flex-col items-center justify-center p-8 bg-white">
+        <div className="md:w-1/2 flex flex-col items-center justify-center p-12 bg-white">
           {/* Logo and Welcome */}
           <div className="flex flex-col items-center mb-6 w-full">
             <img src="/Logoone.png" alt="Kudos Logo" className="h-14 w-14 rounded-xl shadow mb-2" />
