@@ -25,8 +25,8 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#6a5af9',
+					foreground: '#fff'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -41,8 +41,8 @@ export default {
 					foreground: 'hsl(var(--muted-foreground))'
 				},
 				accent: {
-					DEFAULT: 'hsl(var(--primary));',
-					foreground: 'hsl(var(--accent-foreground))'
+					DEFAULT: '#57d0ac',
+					foreground: '#fff'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -80,14 +80,14 @@ export default {
 				}
 			},
 			backgroundImage: {
-				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-card': 'var(--gradient-card)',
-				'gradient-hero': 'var(--gradient-hero)'
+				'gradient-primary': 'linear-gradient(to right, #6a5af9 0%, #57d0ac 100%)',
+				'gradient-card': '#FFFFFF',
+				'gradient-hero': 'linear-gradient(135deg, hsl(246 70% 60% / 0.1) 0%, hsl(172 60% 45% / 0.1) 100%)'
 			},
 			boxShadow: {
 				'soft': 'var(--shadow-soft)',
 				'medium': 'var(--shadow-medium)',
-				'large': 'var(--shadow-large)'
+				'large': 'var(--shadow-medium)'
 			},
 			transitionProperty: {
 				'smooth': 'var(--transition-smooth)',

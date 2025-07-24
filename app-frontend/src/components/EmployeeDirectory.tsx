@@ -50,7 +50,11 @@ export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (employee.skills || []).some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+      (employee.skills || []).some(skill => {
+        if (skill == null) return false;
+        const skillName = typeof skill === 'object' ? skill.name : skill;
+        return skillName && skillName.toLowerCase().includes(searchTerm.toLowerCase());
+      });
     return matchesSearch;
   });
 
@@ -73,7 +77,7 @@ export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
-              placeholder="Search by name, role, or skills..."
+              placeholder="Search by name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-12 py-3 rounded-lg shadow bg-background/80 text-base"
@@ -106,7 +110,7 @@ export const EmployeeDirectory = ({ onGiveStar }: EmployeeDirectoryProps) => {
                 <div className="flex flex-wrap gap-2">
                   {employee.skills.slice(0, 3).map((skill, index) => (
                     <Badge key={index} variant="outline" className="rounded-full px-3 py-1 text-sm font-medium">
-                      {skill}
+                      {skill == null ? '' : (typeof skill === 'object' ? skill.name : skill)}
                     </Badge>
                   ))}
                   {employee.skills.length > 3 && (

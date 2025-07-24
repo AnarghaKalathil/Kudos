@@ -22,7 +22,8 @@ interface Recognition {
   date: string;
   message: string;
   tags: string[];
-  status: "pending" | "accepted" | "rejected";
+  status: "pending" | "approved" | "rejected";
+  backendId: number; // Added for backend ID
 }
 
 const categoryColors: Record<string, string> = {
@@ -35,7 +36,7 @@ type ActionType = "accept" | "reject" | "moveToAccepted" | null;
 
 export default function RecognitionTabs() {
   const [recognitions, setRecognitions] = useState<Recognition[]>([]);
-  const [activeTab, setActiveTab] = useState<"pending" | "accepted" | "rejected">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected">("pending");
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -49,9 +50,10 @@ export default function RecognitionTabs() {
       if (Array.isArray(data)) {
         // Map backend fields to UI fields
         const mapped = data.map((item, idx) => ({
-          id: item.id?.toString() || idx.toString(),
+          id: item.id?.toString() || idx.toString(), // UI id
+          backendId: item.id, // Always store backend id for API
           from: item.sender || '',
-          to: item.reviewer || '',
+          to: item.receiver || '',
           skill: Array.isArray(item.skills) ? item.skills.join(', ') : (item.skills || ''),
           category: item.category || '',
           date: item.created_at ? new Date(item.created_at).toLocaleDateString() : '',
@@ -65,8 +67,10 @@ export default function RecognitionTabs() {
   }, []);
 
   const handleStatusChange = async (id: string, newStatus: Recognition["status"]) => {
-    // Call backend API
-    const response = await changeRecognitionStatusAPI(Number(id), newStatus.toUpperCase());
+    // Find the backend id for this recognition
+    const rec = recognitions.find(r => r.id === id);
+    const backendId = rec && rec.backendId ? rec.backendId : id;
+    const response = await changeRecognitionStatusAPI(Number(backendId), newStatus.toUpperCase());
     if (!response.success) {
       toast({
         title: "Error",
@@ -89,9 +93,9 @@ export default function RecognitionTabs() {
   const confirmAction = () => {
     if (!selectedRecognition || !actionType) return;
 
-    if (actionType === "accept") handleStatusChange(selectedRecognition.id, "accepted");
+    if (actionType === "accept") handleStatusChange(selectedRecognition.id, "approved");
     if (actionType === "reject") handleStatusChange(selectedRecognition.id, "rejected");
-    if (actionType === "moveToAccepted") handleStatusChange(selectedRecognition.id, "accepted");
+    if (actionType === "moveToAccepted") handleStatusChange(selectedRecognition.id, "approved");
 
     setModalOpen(false);
     setSelectedRecognition(null);
@@ -113,7 +117,7 @@ export default function RecognitionTabs() {
         >
           <TabsList className="grid grid-cols-3 p-4 gap-2 h-16">
             <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="accepted">Accepted</TabsTrigger>
+            <TabsTrigger value="accepted">Approved</TabsTrigger>
             <TabsTrigger value="rejected">Rejected</TabsTrigger>
           </TabsList>
 
@@ -170,14 +174,14 @@ export default function RecognitionTabs() {
                                 variant="outline"
                                 onClick={() => openConfirmation(recognition, "accept")}
                               >
-                                Accept
+                                Approve
                               </Button>
                               <Button 
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => openConfirmation(recognition, "reject")}
                               >
-                                Reject
+                                Decline
                               </Button>
                             </div>
                           )}
@@ -189,7 +193,7 @@ export default function RecognitionTabs() {
                                 variant="outline"
                                 onClick={() => openConfirmation(recognition, "moveToAccepted")}
                               >
-                                Move to Accepted
+                                Move to Approved
                               </Button>
                             </div>
                           )}
@@ -216,7 +220,7 @@ export default function RecognitionTabs() {
                   ? "Accept"
                   : actionType === "reject"
                   ? "Reject"
-                  : "Move to Accepted"}
+                  : "Move to Approved"}
               </strong>{" "}
             </p>
           </div>
