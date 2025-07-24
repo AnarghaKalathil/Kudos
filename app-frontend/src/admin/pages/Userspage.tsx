@@ -92,13 +92,13 @@ const UsersPage: React.FC = () => {
       setDeleteId(null);
       setIsDeleteConfirm(false);
     } catch (err: any) {
-      // Try to extract and display all error messages from API response
+      // Show all error messages as a string, not [object Object]
       let errorMsg = '';
-      if (err && err.response && err.response.data && err.response.data.message) {
-        const msgObj = err.response.data.message;
-        if (typeof msgObj === 'object') {
+      if (err && err.response && err.response.message) {
+        const msgObj = err.response.message;
+        if (typeof msgObj === 'object' && msgObj !== null) {
           errorMsg = Object.values(msgObj)
-            .flat()
+            .map((v) => Array.isArray(v) ? v.join(' ') : v)
             .join(' ');
         } else if (typeof msgObj === 'string') {
           errorMsg = msgObj;
@@ -154,7 +154,7 @@ const UsersPage: React.FC = () => {
         )}
         <FormModal
           open={open}
-          handleClose={() => setOpen(false)}
+          handleClose={() => { setOpen(false); setError(null); }}
           formData={formData}
           setFormData={setFormData}
           handleSubmit={handleSubmit}
@@ -162,9 +162,6 @@ const UsersPage: React.FC = () => {
           isDeleteConfirm={isDeleteConfirm}
           error={error}
         />
-        {error && (
-          <div className="text-red-600 text-sm text-center mt-2">{error}</div>
-        )}
       </div>
     </div>
   );

@@ -71,6 +71,15 @@ const CategoriesPage: React.FC = () => {
     }
   };
 
+  const handleSubmitWithCheck = async () => {
+    if (categories.some(c => (c.name || '').toLowerCase() === (formData.name || '').toLowerCase())) {
+      setError('A category with that name already exists.');
+      return;
+    }
+    setError(null);
+    await handleSubmit();
+  };
+
   const columns = [
     { key: 'name', label: 'Category Name' },
   ];
@@ -108,12 +117,13 @@ const CategoriesPage: React.FC = () => {
         )}
         <FormModal
           open={open}
-          handleClose={() => setOpen(false)}
+          handleClose={() => { setOpen(false); setError(null); }}
           formData={formData}
           setFormData={setFormData}
-          handleSubmit={handleSubmit}
+          handleSubmit={handleSubmitWithCheck}
           title={isDeleteConfirm ? 'Delete Confirmation' : 'Add Category'}
           isDeleteConfirm={isDeleteConfirm}
+          error={error}
         />
         {error && (
           <div className="text-red-600 text-sm text-center mt-2">{error}</div>
