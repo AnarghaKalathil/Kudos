@@ -194,7 +194,7 @@ export const UnifiedDashboard = () => {
                     <CardTitle className="flex items-center gap-3 text-xl font-bold">
                       <Trophy className="w-6 h-6 text-warning" /> Top Contributors
                     </CardTitle>
-                    <CardDescription className="text-base">See who's making the biggest impact this month</CardDescription>
+                    <CardDescription className="text-base">See who's making the biggest impact </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-1 flex flex-col justify-end">
                     <Button variant="outline" className="w-full py-2 rounded-lg font-semibold hover:bg-primary/10 hover:text-primary transition" onClick={() => setActiveTab('directory')}> <Trophy className="w-5 h-5 mr-2" /> View Directory</Button>

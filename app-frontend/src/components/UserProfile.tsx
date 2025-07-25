@@ -81,10 +81,10 @@ export const UserProfile = () => {
       if (data && Array.isArray(data.recognitions)) {
         const username = localUser?.username?.toLowerCase();
         const received = data.recognitions.filter((rec: any) =>
-          (rec.receiver && rec.receiver.toLowerCase() === username)
+          (rec.receiver && rec.receiver.toLowerCase() === username) && (rec.status === 'APPROVED' || rec.status === 'approved')
         );
         const sent = data.recognitions.filter((rec: any) =>
-          (rec.sender && rec.sender.toLowerCase() === username)
+          (rec.sender && rec.sender.toLowerCase() === username) && (rec.status === 'APPROVED' || rec.status === 'approved')
         );
         setReceiverRecognitions(received);
         setSenderRecognitions(sent);

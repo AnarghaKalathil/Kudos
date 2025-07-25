@@ -76,11 +76,16 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden">
         {/* Left: Illustration and message */}
-        <div className="md:w-1/2 flex flex-col items-center justify-center bg-white/80 p-12 text-foreground">
+    <div className="hidden md:flex md:w-1/2 flex-col items-center justify-center bg-white/80 p-12 text-foreground">
           <div className="w-full flex flex-col items-center justify-center h-full">
-            <img src="/Frame_1.png" alt="Recognize teammates" className="max-w-xl w-full h-auto rounded-xl shadow-2xl mx-auto" />
+            <img
+              src="/Frame_1.png"
+              alt="Recognize teammates"
+              className="max-w-xl w-full h-auto rounded-xl shadow-2xl mx-auto"
+            />
           </div>
         </div>
+
         {/* Right: Login form */}
         <div className="md:w-1/2 flex flex-col items-center justify-center p-12 bg-white">
           {/* Logo and Welcome */}
@@ -172,7 +177,7 @@ const Login = () => {
                 </form>
               </Form>
               <div className="text-center text-sm text-gray-500">
-                Don&apos;t have an account? <a href="#" className="text-primary font-semibold hover:underline">Signup</a>
+               
               </div>
             </CardContent>
           </Card>
