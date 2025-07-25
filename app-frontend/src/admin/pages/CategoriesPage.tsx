@@ -4,10 +4,12 @@ import React, { useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { getAllCategories, createCategory, deleteCategory } from '@/lib/adminApi';
 import Pagination from "@/components/Pagination";
 
 const CategoriesPage: React.FC = () => {
+  const { toast } = useToast();
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +64,10 @@ const CategoriesPage: React.FC = () => {
       } else {
         const newCategory = await createCategory(formData);
         setCategories((prev) => [newCategory, ...prev]);
+        toast({
+          title: 'Category added successfully!',
+          variant: 'default',
+        });
       }
       setOpen(false);
       setDeleteId(null);
@@ -69,6 +75,15 @@ const CategoriesPage: React.FC = () => {
     } catch (err: any) {
       setError(err.message);
     }
+  };
+
+  const handleSubmitWithCheck = async () => {
+    if (categories.some(c => (c.name || '').toLowerCase() === (formData.name || '').toLowerCase())) {
+      setError('A category with that name already exists.');
+      return;
+    }
+    setError(null);
+    await handleSubmit();
   };
 
   const columns = [
@@ -108,12 +123,13 @@ const CategoriesPage: React.FC = () => {
         )}
         <FormModal
           open={open}
-          handleClose={() => setOpen(false)}
+          handleClose={() => { setOpen(false); setError(null); }}
           formData={formData}
           setFormData={setFormData}
-          handleSubmit={handleSubmit}
+          handleSubmit={handleSubmitWithCheck}
           title={isDeleteConfirm ? 'Delete Confirmation' : 'Add Category'}
           isDeleteConfirm={isDeleteConfirm}
+          error={error}
         />
         {error && (
           <div className="text-red-600 text-sm text-center mt-2">{error}</div>

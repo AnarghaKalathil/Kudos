@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { getAllUsers, createUser, deleteUser } from '@/lib/adminApi';
 import Pagination from "@/components/Pagination";
 
 const UsersPage: React.FC = () => {
+  const { toast } = useToast();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,18 +89,22 @@ const UsersPage: React.FC = () => {
       } else {
         const newUser = await createUser(formData);
         setUsers((prev) => [newUser, ...prev]);
+        toast({
+          title: 'User added successfully!',
+          variant: 'default',
+        });
       }
       setOpen(false);
       setDeleteId(null);
       setIsDeleteConfirm(false);
     } catch (err: any) {
-      // Try to extract and display all error messages from API response
+      // Show all error messages as a string, not [object Object]
       let errorMsg = '';
-      if (err && err.response && err.response.data && err.response.data.message) {
-        const msgObj = err.response.data.message;
-        if (typeof msgObj === 'object') {
+      if (err && err.response && err.response.message) {
+        const msgObj = err.response.message;
+        if (typeof msgObj === 'object' && msgObj !== null) {
           errorMsg = Object.values(msgObj)
-            .flat()
+            .map((v) => Array.isArray(v) ? v.join(' ') : v)
             .join(' ');
         } else if (typeof msgObj === 'string') {
           errorMsg = msgObj;
@@ -154,7 +160,7 @@ const UsersPage: React.FC = () => {
         )}
         <FormModal
           open={open}
-          handleClose={() => setOpen(false)}
+          handleClose={() => { setOpen(false); setError(null); }}
           formData={formData}
           setFormData={setFormData}
           handleSubmit={handleSubmit}
@@ -162,9 +168,6 @@ const UsersPage: React.FC = () => {
           isDeleteConfirm={isDeleteConfirm}
           error={error}
         />
-        {error && (
-          <div className="text-red-600 text-sm text-center mt-2">{error}</div>
-        )}
       </div>
     </div>
   );

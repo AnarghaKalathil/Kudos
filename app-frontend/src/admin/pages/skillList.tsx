@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { getAllSkills, createSkill, deleteSkill } from '@/lib/adminApi';
 import Pagination from "@/components/Pagination";
 
 const SkillsPage: React.FC = () => {
+  const { toast } = useToast();
   const [skills, setSkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +72,10 @@ const SkillsPage: React.FC = () => {
       } else {
         const newSkill = await createSkill({ name: formData.name });
         setSkills((prev) => [...prev, newSkill]);
+        toast({
+          title: 'Skill added successfully!',
+          variant: 'default',
+        });
       }
       setOpen(false);
       setDeleteId(null);
@@ -77,6 +83,15 @@ const SkillsPage: React.FC = () => {
     } catch (err: any) {
       setError(err.message);
     }
+  };
+
+  const handleSubmitWithCheck = async () => {
+    if (skills.some(s => (s.name || '').toLowerCase() === (formData.name || '').toLowerCase())) {
+      setError('A skill with that name already exists.');
+      return;
+    }
+    setError(null);
+    await handleSubmit();
   };
 
   const columns = [
@@ -109,12 +124,13 @@ const SkillsPage: React.FC = () => {
         )}
         <FormModal
           open={open}
-          handleClose={() => setOpen(false)}
+          handleClose={() => { setOpen(false); setError(null); }}
           formData={formData}
           setFormData={setFormData}
-          handleSubmit={handleSubmit}
+          handleSubmit={handleSubmitWithCheck}
           title={isDeleteConfirm ? 'Delete Confirmation' : editId ? 'Edit Skill' : 'Add Skill'}
           isDeleteConfirm={isDeleteConfirm}
+          error={error}
         />
         {error && (
           <div className="text-red-600 text-sm text-center mt-2">{error}</div>

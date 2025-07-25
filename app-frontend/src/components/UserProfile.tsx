@@ -81,10 +81,10 @@ export const UserProfile = () => {
       if (data && Array.isArray(data.recognitions)) {
         const username = localUser?.username?.toLowerCase();
         const received = data.recognitions.filter((rec: any) =>
-          (rec.receiver && rec.receiver.toLowerCase() === username)
+          (rec.receiver && rec.receiver.toLowerCase() === username) && (rec.status === 'APPROVED' || rec.status === 'approved')
         );
         const sent = data.recognitions.filter((rec: any) =>
-          (rec.sender && rec.sender.toLowerCase() === username)
+          (rec.sender && rec.sender.toLowerCase() === username) && (rec.status === 'APPROVED' || rec.status === 'approved')
         );
         setReceiverRecognitions(received);
         setSenderRecognitions(sent);
@@ -184,28 +184,15 @@ export const UserProfile = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mt-4">
-                    {(() => {
-                      // Collect all skills from recognitions
-                      const allSkills = [] as string[];
-                      (profile?.recognitions || []).forEach((rec: any) => {
-                        if (Array.isArray(rec.skills)) {
-                          rec.skills.forEach((skill: string) => {
-                            if (skill && !allSkills.includes(skill)) {
-                              allSkills.push(skill);
-                            }
-                          });
-                        }
-                      });
-                      return allSkills.length === 0 ? (
-                        <span className="text-muted-foreground text-sm">No skills listed.</span>
-                      ) : (
-                        allSkills.map((skill) => (
-                          <Badge key={skill} variant="outline" className="rounded-full px-3 py-1 text-base font-medium">
-                            {skill}
-                          </Badge>
-                        ))
-                      );
-                    })()}
+                    {profile?.user_skills && profile.user_skills.length > 0 ? (
+                      profile.user_skills.map((skill: any, idx: number) => (
+                        <span key={idx} className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold">
+                          {skill.name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-muted-foreground text-sm">No skills listed.</span>
+                    )}
                   </div>
                 </CardContent>
               </Card>

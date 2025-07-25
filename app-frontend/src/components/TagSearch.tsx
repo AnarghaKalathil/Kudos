@@ -87,7 +87,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
     const matchesMinStars = employee.stars >= (parseInt(minStars) || 0);
 
     return matchesSearch && matchesSkill && matchesDepartment && matchesDesignation && matchesMinStars;
-  });
+  }).sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0));
 
   const getSkillExpertise = (employee: Employee, skill: string) => {
     const recognition = employee.recognitions.find(r => r.skill === skill);
@@ -97,7 +97,7 @@ export const TagSearch = ({ onGiveStar }: TagSearchProps) => {
   const departments = ["all", ...new Set(employees.map(emp => emp.department))];
   const designations = ["all", ...new Set(employees.map(emp => emp.role).filter(Boolean))];
 
-  const popularSkills = skills.slice(0, 8);
+  const popularSkills = skills.slice(0, 20);
 
   // Color palette for random badge colors
   const badgeColors = [
