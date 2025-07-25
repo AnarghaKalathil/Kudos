@@ -84,7 +84,7 @@ export const UserProfile = () => {
           (rec.receiver && rec.receiver.toLowerCase() === username) && (rec.status === 'APPROVED' || rec.status === 'approved')
         );
         const sent = data.recognitions.filter((rec: any) =>
-          (rec.sender && rec.sender.toLowerCase() === username) && (rec.status === 'APPROVED' || rec.status === 'approved')
+          (rec.sender && rec.sender.toLowerCase() === username)
         );
         setReceiverRecognitions(received);
         setSenderRecognitions(sent);
