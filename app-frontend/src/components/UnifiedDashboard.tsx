@@ -15,6 +15,8 @@ import CategoriesPage from "@/admin/pages/CategoriesPage";
 import SkillList from "@/admin/pages/skillList";
 import { getDashboardAPI, getUserProfileAPI } from "../lib/api";
 import { Dialog, DialogContent, DialogFooter, DialogOverlay } from "@/components/ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 // Dynamic admin flag based on login
 const isAdmin = typeof window !== 'undefined' && localStorage.getItem('isSuperuser') === 'true';
@@ -97,63 +99,123 @@ export const UnifiedDashboard = () => {
     handleLogout();
   };
 
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-background to-secondary/60">
+      {/* Hamburger for mobile */}
+      {isMobile && (
+        <button
+          className="fixed top-4 left-4 z-50 p-2 rounded-md bg-white/90 shadow-md border border-border md:hidden"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open sidebar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+      )}
       {/* Sidebar */}
-      <aside className="flex flex-col w-64 min-h-screen bg-card/90 backdrop-blur-lg shadow-xl border-r border-border px-0 py-8 fixed left-0 top-0 z-40">
-        <div className="flex flex-col items-center mb-4 mt-4">
-             <div className="flex flex-row items-center gap-6 mb-6 justify-start">
-          <img src="/Logoone.png" alt="Kudos Logo" className="w-10 h-10 rounded-2xl shadow-md" />       
-            <h1 className="text-xl font-bold text-foreground tracking-tight">Kudos<span className="ml-6"></span></h1>
-        </div>
-          {profile && (
-            <div className="flex items-center gap-3 bg-white/90 rounded-xl shadow px-4 py-3 w-60">
-              <div className="flex-shrink-0">
-                {profile.avatar ? (
-                  <img src={profile.avatar} alt={profile.name} className="w-8 h-8 rounded-full object-cover border-2 border-primary/30 shadow" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow">
-                    {(profile.name && profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()) || 'A'}
+      {isMobile ? (
+        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+          <SheetContent side="left" className="p-0 w-64 bg-card/90 backdrop-blur-lg shadow-xl border-r border-border">
+            <div className="flex flex-col items-center mb-4 mt-4">
+              <div className="flex flex-row items-center gap-6 mb-6 justify-start">
+                <img src="/Logoone.png" alt="Kudos Logo" className="w-10 h-10 rounded-2xl shadow-md" />
+                <h1 className="text-xl font-bold text-foreground tracking-tight">Kudos<span className="ml-6"></span></h1>
+              </div>
+              {profile && (
+                <div className="flex items-center gap-3 bg-white/90 rounded-xl shadow px-4 py-3 w-60">
+                  <div className="flex-shrink-0">
+                    {profile.avatar ? (
+                      <img src={profile.avatar} alt={profile.name} className="w-8 h-8 rounded-full object-cover border-2 border-primary/30 shadow" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow">
+                        {(profile.name && profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()) || 'A'}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <div className="text-lg font-bold text-foreground">{profile.name || 'Admin'}</div>
-                <div className="text-sm text-muted-foreground font-medium truncate">{profile.designation || profile.role}</div>
-              </div>
-              <div className="flex items-center gap-1 ml-2">
-                {/* <svg className="w-5 h-5 text-star" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 17.75l-6.172 3.245 1.179-6.873-5-4.873 6.9-1.002L12 2.5l3.093 6.747 6.9 1.002-5 4.873 1.179 6.873z" /></svg> */}
-                {/* <span className="text-base font-bold text-star">{profile.total_stars ?? 0}</span> */}
-              </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-lg font-bold text-foreground">{profile.name || 'Admin'}</div>
+                    <div className="text-sm text-muted-foreground font-medium truncate">{profile.designation || profile.role}</div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        {/* <div className="flex flex-col items-center gap-6 mb-10">
-          <img src="/Logoone.png" alt="Kudos Logo" className="w-14 h-14 rounded-2xl shadow-md" />
-          <div className="text-center">
-            <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Kudos</h1>
-            <p className="text-sm text-muted-foreground font-medium">Recognition & Knowledge Platform</p>
-          </div>
-        </div> */}
-        <nav className="flex flex-col gap-2 w-full px-6">
-          {(isAdmin ? adminNav : userNav).map((item) => (
+            <nav className="flex flex-col gap-2 w-full px-6">
+              {(isAdmin ? adminNav : userNav).map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => { setActiveTab(item.key); setSidebarOpen(false); }}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all ${activeTab === item.key ? 'bg-primary/10 text-primary' : 'hover:bg-muted/60'}`}
+                >
+                  {item.icon} {item.label}
+                </button>
+              ))}
+              <button
+                onClick={() => { openLogoutModal(); setSidebarOpen(false); }}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all hover:bg-muted/60"
+              >
+                <LogOut className="w-5 h-5" /> Logout
+              </button>
+            </nav>
+            {/* Close button for mobile sidebar */}
             <button
-              key={item.key}
-              onClick={() => setActiveTab(item.key)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all ${activeTab === item.key ? 'bg-primary/10 text-primary' : 'hover:bg-muted/60'}`}
+              className="absolute top-4 right-4 z-50 rounded-full bg-background p-2 shadow hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close sidebar"
             >
-              {item.icon} {item.label}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-          ))}
-          <button
-            onClick={openLogoutModal}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all hover:bg-muted/60"
-          >
-            <LogOut className="w-5 h-5" /> Logout
-          </button>
-        </nav>
-      </aside>
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <aside className="flex flex-col w-64 min-h-screen bg-card/90 backdrop-blur-lg shadow-xl border-r border-border px-0 py-8 fixed left-0 top-0 z-40">
+          <div className="flex flex-col items-center mb-4 mt-4">
+            <div className="flex flex-row items-center gap-6 mb-6 justify-start">
+              <img src="/Logoone.png" alt="Kudos Logo" className="w-10 h-10 rounded-2xl shadow-md" />       
+              <h1 className="text-xl font-bold text-foreground tracking-tight">Kudos<span className="ml-6"></span></h1>
+            </div>
+            {profile && (
+              <div className="flex items-center gap-3 bg-white/90 rounded-xl shadow px-4 py-3 w-60">
+                <div className="flex-shrink-0">
+                  {profile.avatar ? (
+                    <img src={profile.avatar} alt={profile.name} className="w-8 h-8 rounded-full object-cover border-2 border-primary/30 shadow" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow">
+                      {(profile.name && profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()) || 'A'}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-lg font-bold text-foreground">{profile.name || 'Admin'}</div>
+                  <div className="text-sm text-muted-foreground font-medium truncate">{profile.designation || profile.role}</div>
+                </div>
+                <div className="flex items-center gap-1 ml-2">
+                  {/* <svg className="w-5 h-5 text-star" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 17.75l-6.172 3.245 1.179-6.873-5-4.873 6.9-1.002L12 2.5l3.093 6.747 6.9 1.002-5 4.873 1.179 6.873z" /></svg> */}
+                  {/* <span className="text-base font-bold text-star">{profile.total_stars ?? 0}</span> */}
+                </div>
+              </div>
+            )}
+          </div>
+          <nav className="flex flex-col gap-2 w-full px-6">
+            {(isAdmin ? adminNav : userNav).map((item) => (
+              <button
+                key={item.key}
+                onClick={() => setActiveTab(item.key)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all ${activeTab === item.key ? 'bg-primary/10 text-primary' : 'hover:bg-muted/60'}`}
+              >
+                {item.icon} {item.label}
+              </button>
+            ))}
+            <button
+              onClick={openLogoutModal}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all hover:bg-muted/60"
+            >
+              <LogOut className="w-5 h-5" /> Logout
+            </button>
+          </nav>
+        </aside>
+      )}
       {/* Main Content */}
       <main className="flex-1 ml-0 md:ml-64 px-2 sm:px-6 py-8 w-full max-w-full pt-16 md:pt-0">
         <div className={isAdmin ? "w-full min-w-0" : "max-w-7xl mx-auto"}>
