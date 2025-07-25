@@ -126,7 +126,7 @@ const CategoriesPage: React.FC = () => {
           handleClose={() => { setOpen(false); setError(null); }}
           formData={formData}
           setFormData={setFormData}
-          handleSubmit={handleSubmitWithCheck}
+          handleSubmit={isDeleteConfirm ? handleSubmit : handleSubmitWithCheck}
           title={isDeleteConfirm ? 'Delete Confirmation' : 'Add Category'}
           isDeleteConfirm={isDeleteConfirm}
           error={error}

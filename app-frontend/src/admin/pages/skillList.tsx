@@ -127,7 +127,7 @@ const SkillsPage: React.FC = () => {
           handleClose={() => { setOpen(false); setError(null); }}
           formData={formData}
           setFormData={setFormData}
-          handleSubmit={handleSubmitWithCheck}
+          handleSubmit={isDeleteConfirm ? handleSubmit : handleSubmitWithCheck}
           title={isDeleteConfirm ? 'Delete Confirmation' : editId ? 'Edit Skill' : 'Add Skill'}
           isDeleteConfirm={isDeleteConfirm}
           error={error}
