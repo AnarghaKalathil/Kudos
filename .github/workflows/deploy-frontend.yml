@@ -1,0 +1,54 @@
+name: Build and Deploy Frontend
+
+on:
+  push:
+    paths:
+      - 'app-frontend/**'
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: app-frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Cleanup Old `dist/` on Server
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/Kudos/app-frontend/
+            if [ -d "dist" ]; then
+              echo "Old dist/ found. Moving to dist_old/"
+              rm -rf dist_old
+              mv dist dist_old
+            fi
+
+      - name: Deploy New `dist/` to Server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "app-frontend/dist/*"
+          target: "/home/ubuntu/Kudos/app-frontend/dist/"
